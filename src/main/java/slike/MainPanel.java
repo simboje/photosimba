@@ -22,6 +22,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class MainPanel extends JPanel {
 
 	JButton openButton = new JButton("Open file or directory");
@@ -164,8 +165,8 @@ public class MainPanel extends JPanel {
 		super.paintComponent(g);
 		if (displayImage != null) {
 			Graphics2D g2 = (Graphics2D) g;
-			int x = (int) (this.size().getWidth() - (displayImage.getWidth() * .2)) / 2;
-			int y = (int) (this.size().getHeight() - (displayImage.getHeight() * .2)) / 2;
+			int x = (int) (this.getWidth() - (displayImage.getWidth() * .2)) / 2;
+			int y = (int) (this.getHeight() - (displayImage.getHeight() * .2)) / 2;
 
 			if (init) {
 				AffineTransform at = new AffineTransform();
