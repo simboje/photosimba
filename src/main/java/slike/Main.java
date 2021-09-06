@@ -1,6 +1,7 @@
 package slike;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -34,6 +35,8 @@ public class Main {
 
 		panel.setFocusable(true);
 		panel.requestFocusInWindow();
+		
+		frame.setMinimumSize(new Dimension(800, 600));
 
 		frame.setVisible(true);
 		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);

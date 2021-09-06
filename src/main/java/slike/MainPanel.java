@@ -1,8 +1,13 @@
 package slike;
 
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
@@ -21,6 +26,12 @@ public class MainPanel extends JPanel {
 	File[] listOfFiles;
 	BufferedImage[] listOfImages;
 	ImageFilenameFilter imageFilenameFilter;
+	BufferedImage displayImage;
+
+	private boolean init = true;
+	private AffineTransform coordTransform = new AffineTransform();
+
+	int currentFile = 0;
 
 	public MainPanel(String[] args) {
 
@@ -28,12 +39,14 @@ public class MainPanel extends JPanel {
 		this.add(openButton);
 		this.add(fileLabel);
 		this.add(testLabel);
-		
+
 		imageFilenameFilter = new ImageFilenameFilter();
 
-		openButton.addActionListener(new ActionListener() {
+		openButton.setFocusable(false);
+		openButton.addMouseListener(new MouseAdapter() {
 
-			public void actionPerformed(ActionEvent e) {
+			@Override
+			public void mousePressed(MouseEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
@@ -44,6 +57,7 @@ public class MainPanel extends JPanel {
 				// does no work
 				// forcing selected file to be equal to current directory when dialog is open
 				// for the first time
+				// still very bad 'solution' but it will do for testing
 				fileChooser.setSelectedFile(fileChooser.getCurrentDirectory().listFiles()[0].getParentFile());
 				fileChooser.setCurrentDirectory(new File("C:\\Users\\milojevic\\Desktop\\TESTDIRresize"));
 				// after setting selected file need to re-set the directory!
@@ -60,14 +74,39 @@ public class MainPanel extends JPanel {
 				if (listOfFiles != null) {
 					testLabel.setText(selectedDir.getAbsolutePath());
 					openAllImages();
+					displayImage = listOfImages[0]; // show first image
+					// repaint seems to kick the GUI in the right spot and speeds up time for image
+					// to appear on GUI
+					repaint();
 				} else {
 					testLabel.setText("NULL");
 				}
 			}
 		});
 
+		this.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyChar() == 'a') {
+					if (currentFile > 0) {
+						currentFile--;
+						displayImage = listOfImages[currentFile];
+						repaint();
+					}
+				}
+				if (e.getKeyChar() == 'd') {
+					if (currentFile < listOfFiles.length - 1) {
+						currentFile++;
+						displayImage = listOfImages[currentFile];
+						repaint();
+					}
+				}
+			}
+		});
 	}
 
+	// TODO testing purposes!
+	// need to move image load to background thread later
 	private void openAllImages() {
 
 		listOfImages = new BufferedImage[listOfFiles.length];
@@ -76,11 +115,36 @@ public class MainPanel extends JPanel {
 				long mili1 = System.currentTimeMillis();
 				listOfImages[i] = ImageIO.read(listOfFiles[i]);
 				long mili2 = System.currentTimeMillis();
-				System.out.println("File " + listOfFiles[i] + " read time " + (mili2 - mili1));
+				System.out.println("File " + listOfFiles[i] + " load time " + (mili2 - mili1));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
 
+	@Override
+	protected void paintComponent(Graphics g) {
+
+		super.paintComponent(g);
+		if (displayImage != null) {
+			Graphics2D g2 = (Graphics2D) g;
+			int x = (int) (this.size().getWidth() - (displayImage.getWidth() * .2)) / 2;
+			int y = (int) (this.size().getHeight() - (displayImage.getHeight() * .2)) / 2;
+
+			AffineTransform at = new AffineTransform();
+			at.translate(x, y);
+			at.scale(.2, .2);
+			if (init) {
+				g2.setTransform(at);
+				init = false;
+				coordTransform = g2.getTransform();
+			} else {
+				g2.setTransform(coordTransform);
+			}
+
+			g2.drawImage(displayImage, 0, 0, this);
+
+			g2.dispose();
 		}
 	}
 }
