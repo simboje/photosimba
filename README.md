@@ -10,3 +10,6 @@ Intention is to create something to be used instead of default Photos applicatio
 
 ## How to build and use
 A standard Maven project, build from cmd or use Eclipse. Currently buildable as jar but [launch4j](http://launch4j.sourceforge.net/docs.html) config will be added later in order to get .exe for Windows users.
+
+## Credits
+Image drag and zoom code taken from [stackoverflow](https://stackoverflow.com/questions/58021358/java-how-to-do-image-manipulation-pan-zoom-flip-and-rotate).
