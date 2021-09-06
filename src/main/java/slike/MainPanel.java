@@ -16,7 +16,9 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import javax.imageio.ImageIO;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -31,9 +33,10 @@ public class MainPanel extends JPanel {
 
 	File selectedDir;
 	File[] listOfFiles;
-	BufferedImage[] listOfImages;
 	ImageFilenameFilter imageFilenameFilter;
 	BufferedImage displayImage;
+	
+	public static Map<File, BufferedImage> IMAGES_MAP = new HashMap<File, BufferedImage>();
 
 	private boolean init = true;
 	private AffineTransform coordTransform = new AffineTransform();
@@ -88,8 +91,10 @@ public class MainPanel extends JPanel {
 				}
 				if (listOfFiles != null) {
 					testLabel.setText(selectedDir.getAbsolutePath());
-					openAllImages();
-					displayImage = listOfImages[0]; // show first image
+    				long mili1 = System.currentTimeMillis();                	
+					displayImage = getDisplayImage(currentFile); // show first image
+                	long mili2 = System.currentTimeMillis();
+    				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2-mili1));
 					// repaint seems to kick the GUI in the right spot and speeds up time for image
 					// to appear on GUI
 					repaint();
@@ -115,9 +120,7 @@ public class MainPanel extends JPanel {
         this.addMouseWheelListener(new MouseWheelListener() {
         	@Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                
                     zoom(e);
-                
             }
         });
 
@@ -127,36 +130,57 @@ public class MainPanel extends JPanel {
 				if (e.getKeyChar() == 'a') {
 					if (currentFile > 0) {
 						currentFile--;
-						displayImage = listOfImages[currentFile];
+						long mili1 = System.currentTimeMillis();
+						displayImage = getDisplayImage(currentFile);
 						repaint();
+	                	long mili2 = System.currentTimeMillis();
+	    				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2-mili1));
 					}
 				}
 				if (e.getKeyChar() == 'd') {
 					if (currentFile < listOfFiles.length - 1) {
 						currentFile++;
-						displayImage = listOfImages[currentFile];
+						long mili1 = System.currentTimeMillis();
+						displayImage = getDisplayImage(currentFile);
 						repaint();
+	                	long mili2 = System.currentTimeMillis();
+	    				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2-mili1));
 					}
 				}
 			}
 		});
 	}
 
-	// TODO testing purposes!
-	// need to move image load to background thread later
-	private void openAllImages() {
-
-		listOfImages = new BufferedImage[listOfFiles.length];
-		for (int i = 0; i < listOfFiles.length; ++i) {
+	private BufferedImage getDisplayImage(int currentFile) {
+		
+		BufferedImage image = null;
+		
+		if(IMAGES_MAP.containsKey(listOfFiles[currentFile]))
+		{
+			image = IMAGES_MAP.get(listOfFiles[currentFile]);
+		}
+		else {
+			ImageLoaderThread imageLoaderThread = new ImageLoaderThread(listOfFiles, currentFile, true);
+			imageLoaderThread.run();
 			try {
-				long mili1 = System.currentTimeMillis();
-				listOfImages[i] = ImageIO.read(listOfFiles[i]);
-				long mili2 = System.currentTimeMillis();
-				System.out.println("File " + listOfFiles[i] + " load time " + (mili2 - mili1));
-			} catch (Exception e) {
+				imageLoaderThread.join();
+				image = IMAGES_MAP.get(listOfFiles[currentFile]);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		if(currentFile<listOfFiles.length-1)
+		{
+			ImageLoaderThread forwardsThread = new ImageLoaderThread(listOfFiles, currentFile + 1, true);
+			forwardsThread.run();
+		}
+		if(currentFile>0)
+		{
+			ImageLoaderThread backwardsThread = new ImageLoaderThread(listOfFiles, currentFile - 1, true);
+			backwardsThread.run();
+		}
+		return image;
 	}
 
 	@Override
