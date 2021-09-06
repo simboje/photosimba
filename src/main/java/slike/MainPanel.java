@@ -170,16 +170,6 @@ public class MainPanel extends JPanel {
 				e.printStackTrace();
 			}
 		}
-		if(currentFile<listOfFiles.length-1)
-		{
-			ImageLoaderThread forwardsThread = new ImageLoaderThread(listOfFiles, currentFile + 1, true);
-			forwardsThread.run();
-		}
-		if(currentFile>0)
-		{
-			ImageLoaderThread backwardsThread = new ImageLoaderThread(listOfFiles, currentFile - 1, true);
-			backwardsThread.run();
-		}
 		return image;
 	}
 

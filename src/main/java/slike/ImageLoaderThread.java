@@ -13,7 +13,7 @@ public class ImageLoaderThread extends Thread {
 	
 	boolean spawnmorethreads;
 	
-	private final Object lock = new Object();
+	static final Object lock = new Object();
 
 	public ImageLoaderThread(File file) {
 		
