@@ -10,8 +10,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class Main {
 
 	public static void main(String[] args) {
-		
-        try {
+
+		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -33,17 +33,17 @@ public class Main {
 		MainPanel panel = new MainPanel(args);
 		frame.add(panel, BorderLayout.CENTER);
 		frame.pack();
-		
+
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
-		    @Override
-		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-		    	panel.shutdownThread();
-		    }
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				panel.shutdownThread();
+			}
 		});
 
 		panel.setFocusable(true);
 		panel.requestFocusInWindow();
-		
+
 		frame.setMinimumSize(new Dimension(800, 600));
 
 		frame.setVisible(true);
