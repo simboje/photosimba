@@ -161,6 +161,7 @@ public class MainPanel extends JPanel {
 						currentFile--;
 						long mili1 = System.currentTimeMillis();
 						displayImage = getDisplayImage(currentFile);
+						rotateCounter = 0;
 						repaint();
 						long mili2 = System.currentTimeMillis();
 						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
@@ -171,6 +172,7 @@ public class MainPanel extends JPanel {
 						currentFile++;
 						long mili1 = System.currentTimeMillis();
 						displayImage = getDisplayImage(currentFile);
+						rotateCounter = 0;
 						repaint();
 						long mili2 = System.currentTimeMillis();
 						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
