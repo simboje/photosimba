@@ -1,7 +1,10 @@
 package slike;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -11,7 +14,8 @@ public class ImageLoaderThread extends Thread {
 	int currentFile, numberOfFiles;
 	File[] listFiles;
 	
-	boolean spawnmorethreads;
+	private Map<File, BufferedImage> IMAGES_MAP = new HashMap<File, BufferedImage>();
+	private boolean alive;
 	
 	static final Object lock = new Object();
 
@@ -19,56 +23,82 @@ public class ImageLoaderThread extends Thread {
 		
 	}
 
-	public ImageLoaderThread(File[] listOfFiles, int currentFile, boolean spawnmorethreads) {
+	public ImageLoaderThread(File[] listOfFiles, int currentFile) {
 		this.file_to_load = listOfFiles[currentFile];
 		this.listFiles = listOfFiles;
 		this.currentFile = currentFile;
 		numberOfFiles = listOfFiles.length;
-		this.spawnmorethreads = spawnmorethreads;
+		
+		alive = true;
 	}
 
 	@Override
 	public void run() {
-		synchronized (lock) {
-			
+		
+		while(alive)
+		{
+			if( !this.IMAGES_MAP.containsKey(listFiles[currentFile]))
+			{
+				loadImageFile(currentFile);
+			}
+				
+			if(currentFile - 1 >= 0 && ! this.IMAGES_MAP.containsKey(listFiles[currentFile - 1]))
+			{
+				System.out.println("A2");
+				loadImageFile(currentFile-1);
+			}
+				
+			if(currentFile + 1 < listFiles.length && ! this.IMAGES_MAP.containsKey(listFiles[currentFile + 1]))
+			{
+				System.out.println("A3");
+				loadImageFile(currentFile+1);
+			}
+
 			try {
-				// file index is already checked when A or D is catched on panel
-				if(!MainPanel.IMAGES_MAP.containsKey(file_to_load))
-				{
-					MainPanel.IMAGES_MAP.put(file_to_load, ImageIO.read(file_to_load));
-					System.out.println("Added " + file_to_load.toString() + " index " + this.currentFile);
-
-				}
-				else {
-					System.out.println("Hi from thread, map already has file " + file_to_load  + " index " + this.currentFile);
-				}
-
-			} catch (IOException e) {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
 		}
 		
-		if(currentFile>0 && spawnmorethreads)
-		{
-			ImageLoaderThread threadGoBack = new ImageLoaderThread(this.listFiles, currentFile-1, false);
-			threadGoBack.run();
+		System.out.println("Shutting down thread...");
+
+	}
+	
+	public BufferedImage getBufferedImage(int fileIndex)
+	{
+		this.currentFile = fileIndex;
+		if(this.IMAGES_MAP.containsKey(listFiles[fileIndex]))
+			return this.IMAGES_MAP.get(listFiles[fileIndex]);
+		else {
+			loadImageFile(fileIndex);
+			return this.IMAGES_MAP.get(listFiles[fileIndex]);
 		}
-		if(currentFile - 1>0 && spawnmorethreads)
+	}
+	
+	private void loadImageFile(int index) {
+		
+		if(index>=0 && index < listFiles.length)
 		{
-			ImageLoaderThread threadGoBack = new ImageLoaderThread(this.listFiles, currentFile-2, false);
-			threadGoBack.run();
+			if (!this.IMAGES_MAP.containsKey(listFiles[index])) {
+				try {
+					BufferedImage temp_Image = ImageIO.read(listFiles[index]);
+					synchronized (lock) {
+						this.IMAGES_MAP.put(listFiles[index], temp_Image);
+					}
+					System.out.println("Added " + listFiles[index].toString() + " index " + index);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("Map already has file " + listFiles[currentFile] + " index " + this.currentFile);
+			}
 		}
-		if(currentFile<numberOfFiles-1 && spawnmorethreads)
-		{
-			ImageLoaderThread threadGoForward = new ImageLoaderThread(this.listFiles, currentFile+1, false);
-			threadGoForward.run();
-		}
-		if(currentFile<numberOfFiles-2 && spawnmorethreads)
-		{
-			ImageLoaderThread threadGoForward = new ImageLoaderThread(this.listFiles, currentFile+2, false);
-			threadGoForward.run();
-		}	
+
+	}
+
+	public void setAlive(boolean alive) {
+		this.alive = alive;
 	}
 
 }

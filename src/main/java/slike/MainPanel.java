@@ -16,8 +16,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -35,8 +33,6 @@ public class MainPanel extends JPanel {
 	File[] listOfFiles;
 	ImageFilenameFilter imageFilenameFilter;
 	BufferedImage displayImage;
-	
-	public static Map<File, BufferedImage> IMAGES_MAP = new HashMap<File, BufferedImage>();
 
 	private boolean init = true;
 	private AffineTransform coordTransform = new AffineTransform();
@@ -50,6 +46,8 @@ public class MainPanel extends JPanel {
     private int minZoomLevel = -20;
     private int maxZoomLevel = 10;
     private double zoomMultiplicationFactor = 1.2;
+    
+    ImageLoaderThread imageLoaderThread;
 
 	public MainPanel(String[] args) {
 
@@ -89,6 +87,17 @@ public class MainPanel extends JPanel {
 						listOfFiles = selectedDir.getParentFile().listFiles(imageFilenameFilter);
 					}
 				}
+				
+				if (imageLoaderThread!=null) {
+					
+					imageLoaderThread.setAlive(false);
+					
+				}
+				
+				imageLoaderThread = new ImageLoaderThread(listOfFiles, 0);
+				// start loading images
+				imageLoaderThread.start();
+				
 				if (listOfFiles != null) {
 					testLabel.setText(selectedDir.getAbsolutePath());
     				long mili1 = System.currentTimeMillis();                	
@@ -153,24 +162,7 @@ public class MainPanel extends JPanel {
 
 	private BufferedImage getDisplayImage(int currentFile) {
 		
-		BufferedImage image = null;
-		
-		if(IMAGES_MAP.containsKey(listOfFiles[currentFile]))
-		{
-			image = IMAGES_MAP.get(listOfFiles[currentFile]);
-		}
-		else {
-			ImageLoaderThread imageLoaderThread = new ImageLoaderThread(listOfFiles, currentFile, true);
-			imageLoaderThread.run();
-			try {
-				imageLoaderThread.join();
-				image = IMAGES_MAP.get(listOfFiles[currentFile]);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return image;
+		return imageLoaderThread.getBufferedImage(currentFile);
 	}
 
 	@Override
@@ -249,4 +241,9 @@ public class MainPanel extends JPanel {
         inverse.transform(p1, p2);
         return p2;
     }
+
+	public void shutdownThread() {
+		imageLoaderThread.setAlive(false);
+		
+	}
 }

@@ -29,9 +29,17 @@ public class Main {
 
 		JFrame frame = new JFrame("SLIKE");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
 		MainPanel panel = new MainPanel(args);
 		frame.add(panel, BorderLayout.CENTER);
 		frame.pack();
+		
+		frame.addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+		    	panel.shutdownThread();
+		    }
+		});
 
 		panel.setFocusable(true);
 		panel.requestFocusInWindow();
