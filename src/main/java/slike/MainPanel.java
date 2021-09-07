@@ -243,7 +243,8 @@ public class MainPanel extends JPanel {
     }
 
 	public void shutdownThread() {
-		imageLoaderThread.setAlive(false);
+		if(imageLoaderThread!=null)
+			imageLoaderThread.setAlive(false);
 		
 	}
 }
