@@ -11,7 +11,7 @@ import javax.imageio.ImageIO;
 public class ImageLoaderThread extends Thread {
 	
 	File file_to_load;
-	int currentFile, numberOfFiles;
+	int currentFile;
 	File[] listFiles;
 	
 	private Map<File, BufferedImage> IMAGES_MAP = new HashMap<File, BufferedImage>();
@@ -27,7 +27,6 @@ public class ImageLoaderThread extends Thread {
 		this.file_to_load = listOfFiles[currentFile];
 		this.listFiles = listOfFiles;
 		this.currentFile = currentFile;
-		numberOfFiles = listOfFiles.length;
 		
 		alive = true;
 	}
@@ -37,22 +36,9 @@ public class ImageLoaderThread extends Thread {
 		
 		while(alive)
 		{
-			if( !this.IMAGES_MAP.containsKey(listFiles[currentFile]))
-			{
-				loadImageFile(currentFile);
-			}
-				
-			if(currentFile - 1 >= 0 && ! this.IMAGES_MAP.containsKey(listFiles[currentFile - 1]))
-			{
-				System.out.println("A2");
-				loadImageFile(currentFile-1);
-			}
-				
-			if(currentFile + 1 < listFiles.length && ! this.IMAGES_MAP.containsKey(listFiles[currentFile + 1]))
-			{
-				System.out.println("A3");
-				loadImageFile(currentFile+1);
-			}
+			loadImageFile(currentFile);
+			loadImageFile(currentFile-1);
+			loadImageFile(currentFile+1);
 
 			try {
 				Thread.sleep(100);
@@ -86,12 +72,9 @@ public class ImageLoaderThread extends Thread {
 					synchronized (lock) {
 						this.IMAGES_MAP.put(listFiles[index], temp_Image);
 					}
-					System.out.println("Added " + listFiles[index].toString() + " index " + index);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			} else {
-				System.out.println("Map already has file " + listFiles[currentFile] + " index " + this.currentFile);
 			}
 		}
 
