@@ -176,12 +176,12 @@ public class MainPanel extends JPanel {
 						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					}
 				}
-				if (e.getKeyChar() == 'w') {
+				if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
 					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 					rotateCounter--;
 					repaint();
 				}
-				if (e.getKeyChar() == 's') {
+				if (e.getKeyCode() == 83 || e.getKeyCode() == 40) { // s or DOWN - rotate clockwise
 					coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 					rotateCounter++;
 					repaint();
