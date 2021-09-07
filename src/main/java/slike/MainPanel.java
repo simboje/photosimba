@@ -4,6 +4,8 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -48,6 +50,7 @@ public class MainPanel extends JPanel {
     private double zoomMultiplicationFactor = 1.2;
     
     ImageLoaderThread imageLoaderThread;
+	private int rotateCounter=0;
 
 	public MainPanel(String[] args) {
 
@@ -55,6 +58,14 @@ public class MainPanel extends JPanel {
 		this.add(openButton);
 		this.add(fileLabel);
 		this.add(testLabel);
+		
+		this.addComponentListener(new ComponentAdapter() {
+		    @Override
+		    public void componentResized(ComponentEvent e) {
+		        init = true;
+		        repaint();
+		    }
+		});
 
 		imageFilenameFilter = new ImageFilenameFilter();
 
@@ -92,7 +103,6 @@ public class MainPanel extends JPanel {
 					// shutdown thread for new directory
 					imageLoaderThread.setAlive(false);
 					currentFile = 0;
-					
 				}
 				
 				imageLoaderThread = new ImageLoaderThread(listOfFiles, 0);
@@ -117,8 +127,17 @@ public class MainPanel extends JPanel {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                dragStartScreen = e.getPoint();
-                dragEndScreen = null;
+            	if(e.getButton() == MouseEvent.BUTTON1)
+            	{
+                    dragStartScreen = e.getPoint();
+                    dragEndScreen = null;
+            	}
+            	else if(e.getButton() == MouseEvent.BUTTON2)
+            	{	// scroll button click - reset image to initial size
+            		init = true;
+            		repaint();
+            	}
+
             }
         });
         this.addMouseMotionListener(new MouseMotionAdapter() {
@@ -137,34 +156,42 @@ public class MainPanel extends JPanel {
 		this.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyChar() == 'a') {
+				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) {	// go left
 					if (currentFile > 0) {
 						currentFile--;
 						long mili1 = System.currentTimeMillis();
 						displayImage = getDisplayImage(currentFile);
 						repaint();
-	                	long mili2 = System.currentTimeMillis();
-	    				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2-mili1));
+						long mili2 = System.currentTimeMillis();
+						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					}
 				}
-				if (e.getKeyChar() == 'd') {
+				if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
 					if (currentFile < listOfFiles.length - 1) {
 						currentFile++;
 						long mili1 = System.currentTimeMillis();
 						displayImage = getDisplayImage(currentFile);
 						repaint();
-	                	long mili2 = System.currentTimeMillis();
-	    				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2-mili1));
+						long mili2 = System.currentTimeMillis();
+						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					}
+				}
+				if (e.getKeyChar() == 'w') {
+					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
+					rotateCounter--;
+					repaint();
+				}
+				if (e.getKeyChar() == 's') {
+					coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
+					rotateCounter++;
+					repaint();
 				}
 			}
 		});
 	}
 
 	private BufferedImage getDisplayImage(int currentFile) {
-		
 		init = true;
-		
 		return imageLoaderThread.getBufferedImage(currentFile);
 	}
 
@@ -177,7 +204,7 @@ public class MainPanel extends JPanel {
 
 			if (init) {
 				AffineTransform at = calculateScale();
-				//at.setToRotation(90);
+				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 				g2.setTransform(at);
 				init = false;
 				coordTransform = g2.getTransform();
