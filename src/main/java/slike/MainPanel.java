@@ -89,8 +89,9 @@ public class MainPanel extends JPanel {
 				}
 				
 				if (imageLoaderThread!=null) {
-					
+					// shutdown thread for new directory
 					imageLoaderThread.setAlive(false);
+					currentFile = 0;
 					
 				}
 				
@@ -162,6 +163,8 @@ public class MainPanel extends JPanel {
 
 	private BufferedImage getDisplayImage(int currentFile) {
 		
+		init = true;
+		
 		return imageLoaderThread.getBufferedImage(currentFile);
 	}
 
@@ -171,13 +174,10 @@ public class MainPanel extends JPanel {
 		super.paintComponent(g);
 		if (displayImage != null) {
 			Graphics2D g2 = (Graphics2D) g;
-			int x = (int) (this.getWidth() - (displayImage.getWidth() * .2)) / 2;
-			int y = (int) (this.getHeight() - (displayImage.getHeight() * .2)) / 2;
 
 			if (init) {
-				AffineTransform at = new AffineTransform();
-				at.translate(x, y);
-				at.scale(.2, .2);
+				AffineTransform at = calculateScale();
+				//at.setToRotation(90);
 				g2.setTransform(at);
 				init = false;
 				coordTransform = g2.getTransform();
@@ -191,7 +191,36 @@ public class MainPanel extends JPanel {
 		}
 	}
 	
-    private void pan(MouseEvent e) {
+	private AffineTransform calculateScale() {
+		AffineTransform at = new AffineTransform();
+		int x = 0;
+		int y = 0;
+		float xscale = (float) this.getWidth() / displayImage.getWidth();
+		float yscale = (float) this.getHeight() / displayImage.getHeight();
+		if (xscale > yscale) {
+			// in this case image is 'taller' than the frame
+			// need to scale image on y axis in order to fit in the frame from inside
+			at.scale(yscale, yscale);
+			// af applies (multiplies) scale to x so need to pre-empt this and divide with
+			// yscale
+			// final x value in at will then have expected value
+			x = (int) ((this.getWidth() - displayImage.getWidth() * yscale) / yscale / 2);
+		}
+
+		else {
+			// in this case image is 'wider' than the frame
+			// need to scale image on y axis
+			at.scale(xscale, xscale);
+			y = (int) ((this.getHeight() - displayImage.getHeight() * xscale) / xscale / 2); // scale fix
+		}
+		at.translate(x, y);
+
+		// initial testing looks good, image is scaled properly, centered on x or y axis
+		// and fills in frame properly
+		return at;
+	}
+
+	private void pan(MouseEvent e) {
         try {
             dragEndScreen = e.getPoint();
             Point2D.Float dragStart = transformPoint(dragStartScreen);
