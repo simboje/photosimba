@@ -40,17 +40,17 @@ public class MainPanel extends JPanel {
 	private AffineTransform coordTransform = new AffineTransform();
 
 	int currentFile = 0;
-	
-    private Point dragStartScreen;
-    private Point dragEndScreen;
-    
-    private int zoomLevel = 0;
-    private int minZoomLevel = -20;
-    private int maxZoomLevel = 10;
-    private double zoomMultiplicationFactor = 1.2;
-    
-    ImageLoaderThread imageLoaderThread;
-	private int rotateCounter=0;
+
+	private Point dragStartScreen;
+	private Point dragEndScreen;
+
+	private int zoomLevel = 0;
+	private int minZoomLevel = -20;
+	private int maxZoomLevel = 10;
+	private double zoomMultiplicationFactor = 1.2;
+
+	ImageLoaderThread imageLoaderThread;
+	private int rotateCounter = 0;
 
 	public MainPanel(String[] args) {
 
@@ -58,13 +58,13 @@ public class MainPanel extends JPanel {
 		this.add(openButton);
 		this.add(fileLabel);
 		this.add(testLabel);
-		
+
 		this.addComponentListener(new ComponentAdapter() {
-		    @Override
-		    public void componentResized(ComponentEvent e) {
-		        init = true;
-		        repaint();
-		    }
+			@Override
+			public void componentResized(ComponentEvent e) {
+				init = true;
+				repaint();
+			}
 		});
 
 		imageFilenameFilter = new ImageFilenameFilter();
@@ -98,23 +98,23 @@ public class MainPanel extends JPanel {
 						listOfFiles = selectedDir.getParentFile().listFiles(imageFilenameFilter);
 					}
 				}
-				
-				if (imageLoaderThread!=null) {
+
+				if (imageLoaderThread != null) {
 					// shutdown thread for new directory
 					imageLoaderThread.setAlive(false);
 					currentFile = 0;
 				}
-				
+
 				imageLoaderThread = new ImageLoaderThread(listOfFiles, 0);
 				// start loading images
 				imageLoaderThread.start();
-				
+
 				if (listOfFiles != null) {
 					testLabel.setText(selectedDir.getAbsolutePath());
-    				long mili1 = System.currentTimeMillis();                	
+					long mili1 = System.currentTimeMillis();
 					displayImage = getDisplayImage(currentFile); // show first image
-                	long mili2 = System.currentTimeMillis();
-    				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2-mili1));
+					long mili2 = System.currentTimeMillis();
+					System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					// repaint seems to kick the GUI in the right spot and speeds up time for image
 					// to appear on GUI
 					repaint();
@@ -123,40 +123,37 @@ public class MainPanel extends JPanel {
 				}
 			}
 		});
-		
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-            	if(e.getButton() == MouseEvent.BUTTON1)
-            	{
-                    dragStartScreen = e.getPoint();
-                    dragEndScreen = null;
-            	}
-            	else if(e.getButton() == MouseEvent.BUTTON2)
-            	{	// scroll button click - reset image to initial size
-            		init = true;
-            		repaint();
-            	}
 
-            }
-        });
-        this.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                pan(e);
-            }
-        });
-        this.addMouseWheelListener(new MouseWheelListener() {
-        	@Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                    zoom(e);
-            }
-        });
+		this.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					dragStartScreen = e.getPoint();
+					dragEndScreen = null;
+				} else if (e.getButton() == MouseEvent.BUTTON2) { // scroll button click - reset image to initial size
+					init = true;
+					repaint();
+				}
+
+			}
+		});
+		this.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				pan(e);
+			}
+		});
+		this.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				zoom(e);
+			}
+		});
 
 		this.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) {	// go left
+				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) { // go left
 					if (currentFile > 0) {
 						currentFile--;
 						long mili1 = System.currentTimeMillis();
@@ -219,7 +216,7 @@ public class MainPanel extends JPanel {
 			g2.dispose();
 		}
 	}
-	
+
 	private AffineTransform calculateScale() {
 		AffineTransform at = new AffineTransform();
 		int x = 0;
@@ -250,59 +247,59 @@ public class MainPanel extends JPanel {
 	}
 
 	private void pan(MouseEvent e) {
-        try {
-            dragEndScreen = e.getPoint();
-            Point2D.Float dragStart = transformPoint(dragStartScreen);
-            Point2D.Float dragEnd = transformPoint(dragEndScreen);
-            double dx = dragEnd.getX() - dragStart.getX();
-            double dy = dragEnd.getY() - dragStart.getY();
-            coordTransform.translate(dx, dy);
-            dragStartScreen = dragEndScreen;
-            dragEndScreen = null;
-            repaint();
-        } catch (NoninvertibleTransformException ex) {
-            ex.printStackTrace();
-        }
-    }
+		try {
+			dragEndScreen = e.getPoint();
+			Point2D.Float dragStart = transformPoint(dragStartScreen);
+			Point2D.Float dragEnd = transformPoint(dragEndScreen);
+			double dx = dragEnd.getX() - dragStart.getX();
+			double dy = dragEnd.getY() - dragStart.getY();
+			coordTransform.translate(dx, dy);
+			dragStartScreen = dragEndScreen;
+			dragEndScreen = null;
+			repaint();
+		} catch (NoninvertibleTransformException ex) {
+			ex.printStackTrace();
+		}
+	}
 
-    private void zoom(MouseWheelEvent e) {
-        try {
-            int wheelRotation = e.getWheelRotation();
-            Point p = e.getPoint();
-            if (wheelRotation > 0) {
-                if (zoomLevel < maxZoomLevel) {
-                    zoomLevel++;
-                    Point2D p1 = transformPoint(p);
-                    coordTransform.scale(1 / zoomMultiplicationFactor, 1 / zoomMultiplicationFactor);
-                    Point2D p2 = transformPoint(p);
-                    coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-                    repaint();
-                }
-            } else {
-                if (zoomLevel > minZoomLevel) {
-                    zoomLevel--;
-                    Point2D p1 = transformPoint(p);
-                    coordTransform.scale(zoomMultiplicationFactor, zoomMultiplicationFactor);
-                    Point2D p2 = transformPoint(p);
-                    coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-                    repaint();
-                }
-            }
-        } catch (NoninvertibleTransformException ex) {
-            ex.printStackTrace();
-        }
-    }
+	private void zoom(MouseWheelEvent e) {
+		try {
+			int wheelRotation = e.getWheelRotation();
+			Point p = e.getPoint();
+			if (wheelRotation > 0) {
+				if (zoomLevel < maxZoomLevel) {
+					zoomLevel++;
+					Point2D p1 = transformPoint(p);
+					coordTransform.scale(1 / zoomMultiplicationFactor, 1 / zoomMultiplicationFactor);
+					Point2D p2 = transformPoint(p);
+					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+					repaint();
+				}
+			} else {
+				if (zoomLevel > minZoomLevel) {
+					zoomLevel--;
+					Point2D p1 = transformPoint(p);
+					coordTransform.scale(zoomMultiplicationFactor, zoomMultiplicationFactor);
+					Point2D p2 = transformPoint(p);
+					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+					repaint();
+				}
+			}
+		} catch (NoninvertibleTransformException ex) {
+			ex.printStackTrace();
+		}
+	}
 
-    private Point2D.Float transformPoint(Point p1) throws NoninvertibleTransformException {
-        AffineTransform inverse = coordTransform.createInverse();
-        Point2D.Float p2 = new Point2D.Float();
-        inverse.transform(p1, p2);
-        return p2;
-    }
+	private Point2D.Float transformPoint(Point p1) throws NoninvertibleTransformException {
+		AffineTransform inverse = coordTransform.createInverse();
+		Point2D.Float p2 = new Point2D.Float();
+		inverse.transform(p1, p2);
+		return p2;
+	}
 
 	public void shutdownThread() {
-		if(imageLoaderThread!=null)
+		if (imageLoaderThread != null)
 			imageLoaderThread.setAlive(false);
-		
+
 	}
 }

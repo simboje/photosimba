@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 public class ImageFilenameFilter implements FilenameFilter {
-	
+
 	// TODO
 	// Check https://github.com/haraldk/TwelveMonkeys
 	// and support more image formats
