@@ -56,6 +56,31 @@ public class MainPanel extends JPanel {
 
 	public MainPanel(String[] args) {
 
+		imageFilenameFilter = new ImageFilenameFilter();
+
+		if (args.length == 1) {
+			File selectedFile = new File(args[0]);
+			selectedDir = selectedFile.getParentFile();
+			file_list = selectedDir.listFiles(imageFilenameFilter);
+			currentFile = findFileIndex(file_list, selectedFile);
+			imageLoaderThread = new ImageLoaderThread(file_list, currentFile);
+			// start loading images
+			imageLoaderThread.start();
+
+			if (file_list != null) {
+				testLabel.setText(selectedDir.getAbsolutePath());
+				long mili1 = System.currentTimeMillis();
+				displayImage = getDisplayImage(currentFile); // show first image
+				long mili2 = System.currentTimeMillis();
+				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
+				// repaint seems to kick the GUI in the right spot and speeds up time for image
+				// to appear on GUI
+				repaint();
+			} else {
+				testLabel.setText("NULL");
+			}
+		}
+
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
 		this.add(openButton);
 		this.add(fileLabel);
@@ -69,8 +94,6 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		imageFilenameFilter = new ImageFilenameFilter();
-
 		openButton.setFocusable(false);
 		openButton.addMouseListener(new MouseAdapter() {
 
@@ -79,17 +102,8 @@ public class MainPanel extends JPanel {
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-				// TODO remove default test location
-				fileChooser.setCurrentDirectory(new File("C:\\Users\\milojevic\\Desktop\\TESTDIRresize"));
-
-				// nothing is selected by default and file chooser craps itself and OK button
-				// does no work
-				// forcing selected file to be equal to current directory when dialog is open
-				// for the first time
-				// still very bad 'solution' but it will do for testing
-				fileChooser.setSelectedFile(fileChooser.getCurrentDirectory().listFiles()[0].getParentFile());
-				fileChooser.setCurrentDirectory(new File("C:\\Users\\milojevic\\Desktop\\TESTDIRresize"));
-				// after setting selected file need to re-set the directory!
+				// TODO nothing is selected by default and file chooser craps itself and OK button
+				// does not work
 
 				int result = fileChooser.showOpenDialog(getParent());
 				selectedDir = fileChooser.getSelectedFile();
@@ -200,6 +214,14 @@ public class MainPanel extends JPanel {
 
 			}
 		});
+	}
+
+	private int findFileIndex(File[] flist, File selectedFile) {
+		for (int i = 0; i < flist.length; ++i) {
+			if (flist[i].equals(selectedFile))
+				return i;
+		}
+		return 0;
 	}
 
 	private BufferedImage getDisplayImage(int currentFile) {
