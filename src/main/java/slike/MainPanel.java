@@ -18,6 +18,8 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -32,7 +34,7 @@ public class MainPanel extends JPanel {
 	JLabel testLabel = new JLabel("Test info");
 
 	File selectedDir;
-	File[] listOfFiles;
+	File[] file_list;
 	ImageFilenameFilter imageFilenameFilter;
 	BufferedImage displayImage;
 
@@ -93,9 +95,9 @@ public class MainPanel extends JPanel {
 				selectedDir = fileChooser.getSelectedFile();
 				if (result == JFileChooser.APPROVE_OPTION) {
 					if (selectedDir.isDirectory())
-						listOfFiles = selectedDir.listFiles(imageFilenameFilter);
+						file_list = selectedDir.listFiles(imageFilenameFilter);
 					else {
-						listOfFiles = selectedDir.getParentFile().listFiles(imageFilenameFilter);
+						file_list = selectedDir.getParentFile().listFiles(imageFilenameFilter);
 					}
 				}
 
@@ -105,11 +107,11 @@ public class MainPanel extends JPanel {
 					currentFile = 0;
 				}
 
-				imageLoaderThread = new ImageLoaderThread(listOfFiles, 0);
+				imageLoaderThread = new ImageLoaderThread(file_list, 0);
 				// start loading images
 				imageLoaderThread.start();
 
-				if (listOfFiles != null) {
+				if (file_list != null) {
 					testLabel.setText(selectedDir.getAbsolutePath());
 					long mili1 = System.currentTimeMillis();
 					displayImage = getDisplayImage(currentFile); // show first image
@@ -151,6 +153,7 @@ public class MainPanel extends JPanel {
 		});
 
 		this.addKeyListener(new KeyAdapter() {
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) { // go left
@@ -163,9 +166,8 @@ public class MainPanel extends JPanel {
 						long mili2 = System.currentTimeMillis();
 						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					}
-				}
-				if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
-					if (currentFile < listOfFiles.length - 1) {
+				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
+					if (currentFile < file_list.length - 1) {
 						currentFile++;
 						long mili1 = System.currentTimeMillis();
 						displayImage = getDisplayImage(currentFile);
@@ -174,17 +176,28 @@ public class MainPanel extends JPanel {
 						long mili2 = System.currentTimeMillis();
 						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					}
-				}
-				if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
+				} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
 					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 					rotateCounter--;
 					repaint();
-				}
-				if (e.getKeyCode() == 83 || e.getKeyCode() == 40) { // s or DOWN - rotate clockwise
+				} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40) { // s or DOWN -rotate clockwise
 					coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 					rotateCounter++;
 					repaint();
+				} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown()) {
+					// c = 67, copy file to clipboard
+					List<File> listOfFiles = new ArrayList<File>();
+					listOfFiles.add(file_list[currentFile]);
+
+					ClipboardManager ci = new ClipboardManager(listOfFiles);
+					ci.copyFile();
+
+				} else if (e.getKeyCode() == 67 && e.isControlDown()) {
+					// c = 67, copy image to clipboard
+					ClipboardManager ci = new ClipboardManager(displayImage);
+					ci.copyImage();
 				}
+
 			}
 		});
 	}
