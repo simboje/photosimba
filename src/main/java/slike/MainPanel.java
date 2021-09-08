@@ -187,7 +187,16 @@ public class MainPanel extends JPanel {
 						long mili1 = System.currentTimeMillis();
 						displayImage = getDisplayImage(currentFile);
 						rotateCounter = 0;
-						repaint();
+						
+						//repaint();
+						
+						// https://pavelfatin.com/low-latency-painting-in-awt-and-swing/
+						custompaint();
+						
+						// well...even the built in photos struggle here
+						// image load is super fast but with low quality
+						// it quickly loads full quality but this transition is very noticeable 
+						
 						long mili2 = System.currentTimeMillis();
 						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " rep");
 					}
@@ -215,6 +224,31 @@ public class MainPanel extends JPanel {
 
 			}
 		});
+	}
+
+	protected void custompaint() {
+		paintImmediately(0, 0, this.getWidth(), this.getHeight());
+		/*
+		Graphics g = getGraphics();
+		this.paintComponent(g);
+		if (displayImage != null) {
+			Graphics2D g2 = (Graphics2D) g;
+
+			if (init) {
+				AffineTransform at = calculateScale();
+				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
+				g2.setTransform(at);
+				init = false;
+				coordTransform = g2.getTransform();
+			} else {
+				g2.setTransform(coordTransform);
+			}
+
+			g2.drawImage(displayImage, 0, 0, this);
+
+			g2.dispose();
+		}
+		*/
 	}
 
 	private int findFileIndex(File[] flist, File selectedFile) {
