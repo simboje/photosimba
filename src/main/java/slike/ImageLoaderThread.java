@@ -13,6 +13,7 @@ public class ImageLoaderThread extends Thread {
 	File file_to_load;
 	int currentFile;
 	File[] listFiles;
+	ImagePanel imagePanel;
 
 	private Map<File, BufferedImage> IMAGES_MAP = new HashMap<File, BufferedImage>();
 	private boolean alive;
@@ -23,10 +24,11 @@ public class ImageLoaderThread extends Thread {
 
 	}
 
-	public ImageLoaderThread(File[] listOfFiles, int currentFile) {
+	public ImageLoaderThread(File[] listOfFiles, int currentFile, ImagePanel imagePanel) {
 		this.file_to_load = listOfFiles[currentFile];
 		this.listFiles = listOfFiles;
 		this.currentFile = currentFile;
+		this.imagePanel = imagePanel;
 
 		alive = true;
 	}
@@ -39,6 +41,11 @@ public class ImageLoaderThread extends Thread {
 			loadImageFile(currentFile - 1);
 			loadImageFile(currentFile + 1);
 
+			if (imagePanel.currentFile != currentFile) {
+				loadImageFile(imagePanel.currentFile);
+				imagePanel.notifyAboutNewImage();
+			}
+
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -47,7 +54,6 @@ public class ImageLoaderThread extends Thread {
 		}
 
 		System.out.println("Shutting down thread...");
-
 	}
 
 	public BufferedImage getBufferedImage(int fileIndex) {
