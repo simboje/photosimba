@@ -71,11 +71,12 @@ public class MainPanel extends JPanel {
 				testLabel.setText(selectedDir.getAbsolutePath());
 				long mili1 = System.currentTimeMillis();
 				displayImage = getDisplayImage(currentFile); // show first image
-				long mili2 = System.currentTimeMillis();
-				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 				// repaint seems to kick the GUI in the right spot and speeds up time for image
 				// to appear on GUI
 				repaint();
+				long mili2 = System.currentTimeMillis();
+				// TODO investigate delay when image is shown for the first time
+				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
 			} else {
 				testLabel.setText("NULL");
 			}
@@ -130,10 +131,10 @@ public class MainPanel extends JPanel {
 					long mili1 = System.currentTimeMillis();
 					displayImage = getDisplayImage(currentFile); // show first image
 					long mili2 = System.currentTimeMillis();
-					System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
 					// repaint seems to kick the GUI in the right spot and speeds up time for image
 					// to appear on GUI
 					repaint();
+					System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
 				} else {
 					testLabel.setText("NULL");
 				}
@@ -178,7 +179,7 @@ public class MainPanel extends JPanel {
 						rotateCounter = 0;
 						repaint();
 						long mili2 = System.currentTimeMillis();
-						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
+						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " rep");
 					}
 				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
 					if (currentFile < file_list.length - 1) {
@@ -188,7 +189,7 @@ public class MainPanel extends JPanel {
 						rotateCounter = 0;
 						repaint();
 						long mili2 = System.currentTimeMillis();
-						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1));
+						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " rep");
 					}
 				} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
 					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
