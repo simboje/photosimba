@@ -21,21 +21,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
-public class MainPanel extends JPanel {
-
-	JButton openButton = new JButton("Open file or directory");
-	JLabel fileLabel = new JLabel("File name");
-	JLabel testLabel = new JLabel("Test info");
+public class ImagePanel extends JPanel {
 
 	File selectedDir;
 	File[] file_list;
-	ImageFilenameFilter imageFilenameFilter;
+	
 	BufferedImage displayImage;
 
 	private boolean init = true;
@@ -54,12 +47,13 @@ public class MainPanel extends JPanel {
 	ImageLoaderThread imageLoaderThread;
 	private int rotateCounter = 0;
 
-	public MainPanel(String[] args) {
+	public ImagePanel(String[] args) {
 
-		imageFilenameFilter = new ImageFilenameFilter();
+
 
 		if (args.length == 1) {
 			File selectedFile = new File(args[0]);
+			ImageFilenameFilter imageFilenameFilter = new ImageFilenameFilter();
 			selectedDir = selectedFile.getParentFile();
 			file_list = selectedDir.listFiles(imageFilenameFilter);
 			currentFile = findFileIndex(file_list, selectedFile);
@@ -68,7 +62,6 @@ public class MainPanel extends JPanel {
 			imageLoaderThread.start();
 
 			if (file_list != null) {
-				testLabel.setText(selectedDir.getAbsolutePath());
 				long mili1 = System.currentTimeMillis();
 				displayImage = getDisplayImage(currentFile); // show first image
 				// repaint seems to kick the GUI in the right spot and speeds up time for image
@@ -77,67 +70,16 @@ public class MainPanel extends JPanel {
 				long mili2 = System.currentTimeMillis();
 				// TODO investigate delay when image is shown for the first time
 				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
-			} else {
-				testLabel.setText("NULL");
 			}
 		}
 
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
-		this.add(openButton);
-		this.add(fileLabel);
-		this.add(testLabel);
 
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				init = true;
 				repaint();
-			}
-		});
-
-		openButton.setFocusable(false);
-		openButton.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
-				// TODO nothing is selected by default and file chooser craps itself and OK button
-				// does not work
-
-				int result = fileChooser.showOpenDialog(getParent());
-				selectedDir = fileChooser.getSelectedFile();
-				if (result == JFileChooser.APPROVE_OPTION) {
-					if (selectedDir.isDirectory())
-						file_list = selectedDir.listFiles(imageFilenameFilter);
-					else {
-						file_list = selectedDir.getParentFile().listFiles(imageFilenameFilter);
-					}
-				}
-
-				if (imageLoaderThread != null) {
-					// shutdown thread for new directory
-					imageLoaderThread.setAlive(false);
-					currentFile = 0;
-				}
-
-				imageLoaderThread = new ImageLoaderThread(file_list, 0);
-				// start loading images
-				imageLoaderThread.start();
-
-				if (file_list != null) {
-					testLabel.setText(selectedDir.getAbsolutePath());
-					long mili1 = System.currentTimeMillis();
-					displayImage = getDisplayImage(currentFile); // show first image
-					long mili2 = System.currentTimeMillis();
-					// repaint seems to kick the GUI in the right spot and speeds up time for image
-					// to appear on GUI
-					repaint();
-					System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
-				} else {
-					testLabel.setText("NULL");
-				}
 			}
 		});
 
@@ -337,5 +279,31 @@ public class MainPanel extends JPanel {
 		if (imageLoaderThread != null)
 			imageLoaderThread.setAlive(false);
 
+	}
+
+	public void loadFiles(File[] localFiles) {
+		
+		this.file_list = localFiles;
+		
+		if (imageLoaderThread != null) {
+			// shutdown thread for new directory
+			imageLoaderThread.setAlive(false);
+			currentFile = 0;
+		}
+
+		imageLoaderThread = new ImageLoaderThread(file_list, 0);
+		// start loading images
+		imageLoaderThread.start();
+
+		if (file_list != null) {
+			long mili1 = System.currentTimeMillis();
+			displayImage = getDisplayImage(currentFile); // show first image
+			long mili2 = System.currentTimeMillis();
+			// repaint seems to kick the GUI in the right spot and speeds up time for image
+			// to appear on GUI
+			repaint();
+			System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+		}
+		
 	}
 }
