@@ -9,14 +9,19 @@ Intention is to create something to be used instead of default Photos applicatio
 * Background thread for image loading
 
 ## How to build and use
-A standard Maven project, build from cmd or use Eclipse. Currently buildable as jar but [launch4j](http://launch4j.sourceforge.net/docs.html) config will be added later in order to get .exe for Windows users.
+A standard Maven project, you can build it from cmd using maven or use Eclipse and launch it from there. Currently only buildable as jar but [launch4j](http://launch4j.sourceforge.net/docs.html) config will be added later in order to get .exe for Windows users. If you have Maven installed (and on PATH) you can build the project from cmd using `mvn clean verify`.
+
+## Mouse controls
+* Left button drag - drag image
+* Scroll wheel - zoom in and out
+* Scroll click - reset zoom level and image position to default
 
 ## Keyboard Controls
 * A or Left arrow - previous image
 * D or Right Arrow - next image
 * W or Up arrow - rotate image counter-clockwise (does not save changes to image file)
 * S or Down arrow - rotate image clockwise (does not save changes to image file)
-* Ctrl + C - copies image to clipboard (can be pasted to other image programs)
+* Ctrl + C - copies image to clipboard (can be pasted to other image/chat programs)
 * Ctrl + Shift + C - copies image file to clipboard (can be pasted in file explorer)
 
 ## Credits
