@@ -70,10 +70,10 @@ public class ImageLoaderThread extends Thread {
 		if (index >= 0 && index < imagePanel.getFile_list().length) {
 			if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list()[index])) {
 				try {
-					long mili1 = System.currentTimeMillis();
 					BufferedImage temp_Image = ImageIO.read(imagePanel.getFile_list()[index]);
 					this.IMAGES_MAP.put(imagePanel.getFile_list()[index], temp_Image);
 
+					long mili1 = System.currentTimeMillis();
 					byte[] fileContent = Files.readAllBytes(imagePanel.getFile_list()[index].toPath());
 					ByteArrayInputStream bais2 = new ByteArrayInputStream(fileContent);
 					ImageInformation info = readImageInformation(bais2,
@@ -84,7 +84,7 @@ public class ImageLoaderThread extends Thread {
 					imagePanel.setRotateCounter(info.orientation);
 
 					long mili2 = System.currentTimeMillis();
-					System.out.println(imagePanel.getFile_list()[index].getName() + " load time ms " + (mili2 - mili1)
+					System.out.println(imagePanel.getFile_list()[index].getName() + " EXIF time ms " + (mili2 - mili1)
 							+ " rotation " + info.orientation);
 				} catch (IOException e) {
 					e.printStackTrace();

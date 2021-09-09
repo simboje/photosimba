@@ -315,6 +315,7 @@ public class ImagePanel extends JPanel {
 		// repaint seems to kick the GUI in the right spot and speeds up time for image
 		// to appear on GUI
 		repaint();
-		System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+		
+		// System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
 	}
 }
