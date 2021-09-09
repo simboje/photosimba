@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
@@ -28,13 +29,13 @@ public class ImagePanel extends JPanel {
 
 	File selectedDir;
 	File[] file_list;
-	
+
 	BufferedImage displayImage;
 
 	private boolean init = true;
 	private AffineTransform coordTransform = new AffineTransform();
 
-	int currentFile = 0;
+	public int currentFile = 0;
 
 	private Point dragStartScreen;
 	private Point dragEndScreen;
@@ -47,9 +48,11 @@ public class ImagePanel extends JPanel {
 	ImageLoaderThread imageLoaderThread;
 	private int rotateCounter = 0;
 
-	public ImagePanel(String[] args) {
+	JLabel fileIndexLabel;
 
+	public ImagePanel(String[] args, JLabel fileIndexLabel) {
 
+		this.fileIndexLabel = fileIndexLabel;
 
 		if (args.length == 1) {
 			File selectedFile = new File(args[0]);
@@ -57,19 +60,13 @@ public class ImagePanel extends JPanel {
 			selectedDir = selectedFile.getParentFile();
 			file_list = selectedDir.listFiles(imageFilenameFilter);
 			currentFile = findFileIndex(file_list, selectedFile);
-			imageLoaderThread = new ImageLoaderThread(file_list, currentFile);
+			imageLoaderThread = new ImageLoaderThread(this);
 			// start loading images
 			imageLoaderThread.start();
 
 			if (file_list != null) {
-				long mili1 = System.currentTimeMillis();
-				displayImage = getDisplayImage(currentFile); // show first image
-				// repaint seems to kick the GUI in the right spot and speeds up time for image
-				// to appear on GUI
-				repaint();
-				long mili2 = System.currentTimeMillis();
-				// TODO investigate delay when image is shown for the first time
-				System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+				displayImageAndMeasureTime();
+				fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 			}
 		}
 
@@ -116,22 +113,14 @@ public class ImagePanel extends JPanel {
 				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) { // go left
 					if (currentFile > 0) {
 						currentFile--;
-						long mili1 = System.currentTimeMillis();
-						displayImage = getDisplayImage(currentFile);
 						rotateCounter = 0;
-						repaint();
-						long mili2 = System.currentTimeMillis();
-						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " rep");
+						fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 					}
 				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
 					if (currentFile < file_list.length - 1) {
 						currentFile++;
-						long mili1 = System.currentTimeMillis();
-						displayImage = getDisplayImage(currentFile);
 						rotateCounter = 0;
-						repaint();
-						long mili2 = System.currentTimeMillis();
-						System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " rep");
+						fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 					}
 				} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
 					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
@@ -157,6 +146,10 @@ public class ImagePanel extends JPanel {
 
 			}
 		});
+	}
+	
+	public File[] getFile_list() {
+		return file_list;
 	}
 
 	private int findFileIndex(File[] flist, File selectedFile) {
@@ -282,28 +275,38 @@ public class ImagePanel extends JPanel {
 	}
 
 	public void loadFiles(File[] localFiles) {
-		
+
 		this.file_list = localFiles;
-		
+
 		if (imageLoaderThread != null) {
 			// shutdown thread for new directory
 			imageLoaderThread.setAlive(false);
 			currentFile = 0;
 		}
 
-		imageLoaderThread = new ImageLoaderThread(file_list, 0);
+		imageLoaderThread = new ImageLoaderThread(this);
 		// start loading images
 		imageLoaderThread.start();
 
 		if (file_list != null) {
-			long mili1 = System.currentTimeMillis();
-			displayImage = getDisplayImage(currentFile); // show first image
-			long mili2 = System.currentTimeMillis();
-			// repaint seems to kick the GUI in the right spot and speeds up time for image
-			// to appear on GUI
-			repaint();
-			System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+			displayImageAndMeasureTime();
 		}
-		
+
+		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
+	}
+
+	// called from background thread
+	public void notifyAboutNewImage() {
+		displayImageAndMeasureTime();
+	}
+
+	private void displayImageAndMeasureTime() {
+		long mili1 = System.currentTimeMillis();
+		displayImage = getDisplayImage(currentFile); // show first image
+		long mili2 = System.currentTimeMillis();
+		// repaint seems to kick the GUI in the right spot and speeds up time for image
+		// to appear on GUI
+		repaint();
+		System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
 	}
 }
