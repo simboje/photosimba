@@ -276,6 +276,8 @@ public class ImagePanel extends JPanel {
 
 	public void loadFiles(File[] localFiles) {
 
+		if(localFiles.length>0)
+		{
 		this.file_list = localFiles;
 
 		if (imageLoaderThread != null) {
@@ -293,6 +295,10 @@ public class ImagePanel extends JPanel {
 		}
 
 		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
+		}
+		else {
+			fileIndexLabel.setText("Directory has no image files!");
+		}
 	}
 
 	// called from background thread
