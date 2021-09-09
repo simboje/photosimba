@@ -26,9 +26,9 @@ public class Main {
 		JPanel topPanel = new JPanel();
 		topPanel.setBackground(Color.WHITE);
 
-		JLabel testLabel = new JLabel("test");
+		JLabel fileIndexLabel = new JLabel("test");
 
-		ImagePanel imagePanel = new ImagePanel(args, testLabel);
+		ImagePanel imagePanel = new ImagePanel(args, fileIndexLabel);
 		imagePanel.setBackground(Color.WHITE);
 		imagePanel.setFocusable(true);
 		imagePanel.requestFocusInWindow();
@@ -36,7 +36,7 @@ public class Main {
 		OpenButton openButton = new OpenButton("Open file or directory", imagePanel);
 
 		topPanel.add(openButton, FlowLayout.LEFT);
-		topPanel.add(testLabel, FlowLayout.CENTER);
+		topPanel.add(fileIndexLabel, FlowLayout.CENTER);
 		frame.add(topPanel, BorderLayout.PAGE_START);
 		frame.add(imagePanel, BorderLayout.CENTER);
 

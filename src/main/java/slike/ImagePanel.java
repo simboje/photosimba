@@ -48,11 +48,11 @@ public class ImagePanel extends JPanel {
 	ImageLoaderThread imageLoaderThread;
 	private int rotateCounter = 0;
 
-	JLabel testLabel;
+	JLabel fileIndexLabel;
 
-	public ImagePanel(String[] args, JLabel testLabel) {
+	public ImagePanel(String[] args, JLabel fileIndexLabel) {
 
-		this.testLabel = testLabel;
+		this.fileIndexLabel = fileIndexLabel;
 
 		if (args.length == 1) {
 			File selectedFile = new File(args[0]);
@@ -60,13 +60,13 @@ public class ImagePanel extends JPanel {
 			selectedDir = selectedFile.getParentFile();
 			file_list = selectedDir.listFiles(imageFilenameFilter);
 			currentFile = findFileIndex(file_list, selectedFile);
-			imageLoaderThread = new ImageLoaderThread(file_list, currentFile, this);
+			imageLoaderThread = new ImageLoaderThread(this);
 			// start loading images
 			imageLoaderThread.start();
 
 			if (file_list != null) {
 				displayImageAndMeasureTime();
-				testLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
+				fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 			}
 		}
 
@@ -113,12 +113,14 @@ public class ImagePanel extends JPanel {
 				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) { // go left
 					if (currentFile > 0) {
 						currentFile--;
-						testLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
+						rotateCounter = 0;
+						fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 					}
 				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
 					if (currentFile < file_list.length - 1) {
 						currentFile++;
-						testLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
+						rotateCounter = 0;
+						fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 					}
 				} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
 					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
@@ -144,6 +146,10 @@ public class ImagePanel extends JPanel {
 
 			}
 		});
+	}
+	
+	public File[] getFile_list() {
+		return file_list;
 	}
 
 	private int findFileIndex(File[] flist, File selectedFile) {
@@ -278,7 +284,7 @@ public class ImagePanel extends JPanel {
 			currentFile = 0;
 		}
 
-		imageLoaderThread = new ImageLoaderThread(file_list, 0, this);
+		imageLoaderThread = new ImageLoaderThread(this);
 		// start loading images
 		imageLoaderThread.start();
 
@@ -286,6 +292,7 @@ public class ImagePanel extends JPanel {
 			displayImageAndMeasureTime();
 		}
 
+		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 	}
 
 	// called from background thread
