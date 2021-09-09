@@ -26,7 +26,7 @@ public class Main {
 		JPanel topPanel = new JPanel();
 		topPanel.setBackground(Color.WHITE);
 
-		JLabel fileIndexLabel = new JLabel("test");
+		JLabel fileIndexLabel = new JLabel("0/0");
 
 		ImagePanel imagePanel = new ImagePanel(args, fileIndexLabel);
 		imagePanel.setBackground(Color.WHITE);
