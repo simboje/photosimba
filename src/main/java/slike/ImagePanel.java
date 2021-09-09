@@ -113,20 +113,18 @@ public class ImagePanel extends JPanel {
 				if (e.getKeyCode() == 65 || e.getKeyCode() == 37) { // go left
 					if (currentFile > 0) {
 						currentFile--;
-						rotateCounter = 0;
 						fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 					}
 				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
 					if (currentFile < file_list.length - 1) {
 						currentFile++;
-						rotateCounter = 0;
 						fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 					}
 				} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
 					coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 					rotateCounter--;
 					repaint();
-				} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40) { // s or DOWN -rotate clockwise
+				} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40) { // s or DOWN - rotate clockwise
 					coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 					rotateCounter++;
 					repaint();
@@ -150,6 +148,10 @@ public class ImagePanel extends JPanel {
 	
 	public File[] getFile_list() {
 		return file_list;
+	}
+	
+	public void setRotateCounter(int rotateCounter) {
+		this.rotateCounter = rotateCounter;
 	}
 
 	private int findFileIndex(File[] flist, File selectedFile) {
