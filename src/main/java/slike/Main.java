@@ -5,8 +5,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,7 +29,7 @@ public class Main {
 		JFrame frame = new JFrame("SLIKE");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		ImageIcon icon = new ImageIcon("program_icon.png");
+		ImageIcon icon = new ImageIcon("1x1.png");
 
 		JPanel topPanel = new JPanel();
 		topPanel.setBackground(Color.WHITE);
