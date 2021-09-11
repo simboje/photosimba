@@ -25,7 +25,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
-public class ImagePanel extends JPanel {
+public class ImagePanel extends JPanel
+{
 
 	File selectedDir;
 	File[] file_list;
@@ -50,11 +51,13 @@ public class ImagePanel extends JPanel {
 
 	JLabel fileIndexLabel;
 
-	public ImagePanel(String[] args, JLabel fileIndexLabel) {
+	public ImagePanel(String[] args, JLabel fileIndexLabel)
+	{
 
 		this.fileIndexLabel = fileIndexLabel;
 
-		if (args.length == 1) {
+		if (args.length == 1)
+		{
 			File selectedFile = new File(args[0]);
 			ImageFilenameFilter imageFilenameFilter = new ImageFilenameFilter();
 			selectedDir = selectedFile.getParentFile();
@@ -64,7 +67,8 @@ public class ImagePanel extends JPanel {
 			// start loading images
 			imageLoaderThread.start();
 
-			if (file_list != null) {
+			if (file_list != null)
+			{
 				displayImageAndMeasureTime();
 				fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 			}
@@ -72,65 +76,84 @@ public class ImagePanel extends JPanel {
 
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-		this.addComponentListener(new ComponentAdapter() {
+		this.addComponentListener(new ComponentAdapter()
+		{
 			@Override
-			public void componentResized(ComponentEvent e) {
+			public void componentResized(ComponentEvent e)
+			{
 				init = true;
 				repaint();
 			}
 		});
 
-		this.addMouseListener(new MouseAdapter() {
+		this.addMouseListener(new MouseAdapter()
+		{
 			@Override
-			public void mousePressed(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON1) {
+			public void mousePressed(MouseEvent e)
+			{
+				if (e.getButton() == MouseEvent.BUTTON1)
+				{
 					dragStartScreen = e.getPoint();
 					dragEndScreen = null;
-				} else if (e.getButton() == MouseEvent.BUTTON2) { // scroll button click - reset image to initial size
+				} else if (e.getButton() == MouseEvent.BUTTON2)
+				{ // scroll button click - reset image to initial size
 					init = true;
 					repaint();
 				}
 
 			}
 		});
-		this.addMouseMotionListener(new MouseMotionAdapter() {
+		this.addMouseMotionListener(new MouseMotionAdapter()
+		{
 			@Override
-			public void mouseDragged(MouseEvent e) {
+			public void mouseDragged(MouseEvent e)
+			{
 				pan(e);
 			}
 		});
-		this.addMouseWheelListener(new MouseWheelListener() {
+		this.addMouseWheelListener(new MouseWheelListener()
+		{
 			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
 				zoom(e);
 			}
 		});
 
-		this.addKeyListener(new KeyAdapter() {
+		this.addKeyListener(new KeyAdapter()
+		{
 
 			@Override
-			public void keyPressed(KeyEvent e) {
-				if(file_list != null)
+			public void keyPressed(KeyEvent e)
+			{
+				if (file_list != null)
 				{
-					if (e.getKeyCode() == 65 || e.getKeyCode() == 37) { // go left
-						if (currentFile > 0) {
+					if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
+					{ // go left
+						if (currentFile > 0)
+						{
 							currentFile--;
 							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 						}
-					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39) { // go right
-						if (currentFile < file_list.length - 1) {
+					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
+					{ // go right
+						if (currentFile < file_list.length - 1)
+						{
 							currentFile++;
 							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
 						}
-					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38) { // w or UP - rotate counter clockwise
+					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
+					{ // w or UP - rotate counter clockwise
 						coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter--;
 						repaint();
-					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40) { // s or DOWN - rotate clockwise
+					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
+					{ // s or DOWN - rotate clockwise
 						coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter++;
 						repaint();
-					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown()) {
+					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
+					{
 						// c = 67, copy file to clipboard
 						List<File> listOfFiles = new ArrayList<File>();
 						listOfFiles.add(file_list[currentFile]);
@@ -138,7 +161,8 @@ public class ImagePanel extends JPanel {
 						ClipboardManager ci = new ClipboardManager(listOfFiles);
 						ci.copyFile();
 
-					} else if (e.getKeyCode() == 67 && e.isControlDown()) {
+					} else if (e.getKeyCode() == 67 && e.isControlDown())
+					{
 						// c = 67, copy image to clipboard
 						ClipboardManager ci = new ClipboardManager(displayImage);
 						ci.copyImage();
@@ -147,24 +171,29 @@ public class ImagePanel extends JPanel {
 			}
 		});
 	}
-	
-	public File[] getFile_list() {
+
+	public File[] getFile_list()
+	{
 		return file_list;
 	}
-	
-	public void setRotateCounter(int rotateCounter) {
+
+	public void setRotateCounter(int rotateCounter)
+	{
 		this.rotateCounter = rotateCounter;
 	}
 
-	private int findFileIndex(File[] flist, File selectedFile) {
-		for (int i = 0; i < flist.length; ++i) {
+	private int findFileIndex(File[] flist, File selectedFile)
+	{
+		for (int i = 0; i < flist.length; ++i)
+		{
 			if (flist[i].equals(selectedFile))
 				return i;
 		}
 		return 0;
 	}
 
-	private BufferedImage getDisplayImage(int currentFile) {
+	private BufferedImage getDisplayImage(int currentFile)
+	{
 		init = true;
 		ImageData imageData = imageLoaderThread.getBufferedImage(currentFile);
 		this.rotateCounter = imageData.getRotation();
@@ -172,19 +201,23 @@ public class ImagePanel extends JPanel {
 	}
 
 	@Override
-	protected void paintComponent(Graphics g) {
+	protected void paintComponent(Graphics g)
+	{
 
 		super.paintComponent(g);
-		if (displayImage != null) {
+		if (displayImage != null)
+		{
 			Graphics2D g2 = (Graphics2D) g;
 
-			if (init) {
+			if (init)
+			{
 				AffineTransform at = calculateScale();
 				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 				g2.setTransform(at);
 				init = false;
 				coordTransform = g2.getTransform();
-			} else {
+			} else
+			{
 				g2.setTransform(coordTransform);
 			}
 
@@ -194,13 +227,15 @@ public class ImagePanel extends JPanel {
 		}
 	}
 
-	private AffineTransform calculateScale() {
+	private AffineTransform calculateScale()
+	{
 		AffineTransform at = new AffineTransform();
 		int x = 0;
 		int y = 0;
 		float xscale = (float) this.getWidth() / displayImage.getWidth();
 		float yscale = (float) this.getHeight() / displayImage.getHeight();
-		if (xscale > yscale) {
+		if (xscale > yscale)
+		{
 			// in this case image is 'taller' than the frame
 			// need to scale image on y axis in order to fit in the frame from inside
 			at.scale(yscale, yscale);
@@ -210,7 +245,8 @@ public class ImagePanel extends JPanel {
 			x = (int) ((this.getWidth() - displayImage.getWidth() * yscale) / yscale / 2);
 		}
 
-		else {
+		else
+		{
 			// in this case image is 'wider' than the frame
 			// need to scale image on y axis
 			at.scale(xscale, xscale);
@@ -223,8 +259,10 @@ public class ImagePanel extends JPanel {
 		return at;
 	}
 
-	private void pan(MouseEvent e) {
-		try {
+	private void pan(MouseEvent e)
+	{
+		try
+		{
 			dragEndScreen = e.getPoint();
 			Point2D.Float dragStart = transformPoint(dragStartScreen);
 			Point2D.Float dragEnd = transformPoint(dragEndScreen);
@@ -234,17 +272,22 @@ public class ImagePanel extends JPanel {
 			dragStartScreen = dragEndScreen;
 			dragEndScreen = null;
 			repaint();
-		} catch (NoninvertibleTransformException ex) {
+		} catch (NoninvertibleTransformException ex)
+		{
 			ex.printStackTrace();
 		}
 	}
 
-	private void zoom(MouseWheelEvent e) {
-		try {
+	private void zoom(MouseWheelEvent e)
+	{
+		try
+		{
 			int wheelRotation = e.getWheelRotation();
 			Point p = e.getPoint();
-			if (wheelRotation > 0) {
-				if (zoomLevel < maxZoomLevel) {
+			if (wheelRotation > 0)
+			{
+				if (zoomLevel < maxZoomLevel)
+				{
 					zoomLevel++;
 					Point2D p1 = transformPoint(p);
 					coordTransform.scale(1 / zoomMultiplicationFactor, 1 / zoomMultiplicationFactor);
@@ -252,8 +295,10 @@ public class ImagePanel extends JPanel {
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
 				}
-			} else {
-				if (zoomLevel > minZoomLevel) {
+			} else
+			{
+				if (zoomLevel > minZoomLevel)
+				{
 					zoomLevel--;
 					Point2D p1 = transformPoint(p);
 					coordTransform.scale(zoomMultiplicationFactor, zoomMultiplicationFactor);
@@ -262,64 +307,72 @@ public class ImagePanel extends JPanel {
 					repaint();
 				}
 			}
-		} catch (NoninvertibleTransformException ex) {
+		} catch (NoninvertibleTransformException ex)
+		{
 			ex.printStackTrace();
 		}
 	}
 
-	private Point2D.Float transformPoint(Point p1) throws NoninvertibleTransformException {
+	private Point2D.Float transformPoint(Point p1) throws NoninvertibleTransformException
+	{
 		AffineTransform inverse = coordTransform.createInverse();
 		Point2D.Float p2 = new Point2D.Float();
 		inverse.transform(p1, p2);
 		return p2;
 	}
 
-	public void shutdownThread() {
+	public void shutdownThread()
+	{
 		if (imageLoaderThread != null)
 			imageLoaderThread.setAlive(false);
 
 	}
 
-	public void loadFiles(File[] localFiles) {
-
-		if(localFiles.length>0)
+	public void loadFiles(File[] localFiles)
+	{
+		if (localFiles.length > 0)
 		{
-		this.file_list = localFiles;
+			this.file_list = localFiles;
 
-		if (imageLoaderThread != null) {
-			// shutdown thread for new directory
-			imageLoaderThread.setAlive(false);
-			currentFile = 0;
-		}
+			if (imageLoaderThread != null)
+			{
+				// shutdown thread for new directory
+				imageLoaderThread.setAlive(false);
+				currentFile = 0;
+			}
 
-		imageLoaderThread = new ImageLoaderThread(this);
-		// start loading images
-		imageLoaderThread.start();
+			imageLoaderThread = new ImageLoaderThread(this);
+			// start loading images
+			imageLoaderThread.start();
 
-		if (file_list != null) {
-			displayImageAndMeasureTime();
-		}
+			if (file_list != null)
+			{
+				displayImageAndMeasureTime();
+			}
 
-		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
-		}
-		else {
+			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.length);
+		} else
+		{
 			fileIndexLabel.setText("Selected directory has no image files!");
 		}
 	}
 
 	// called from background thread
-	public void notifyAboutNewImage() {
+	public void notifyAboutNewImage()
+	{
 		displayImageAndMeasureTime();
 	}
 
-	private void displayImageAndMeasureTime() {
+	private void displayImageAndMeasureTime()
+	{
 		long mili1 = System.currentTimeMillis();
 		displayImage = getDisplayImage(currentFile); // show first image
 		long mili2 = System.currentTimeMillis();
 		// repaint seems to kick the GUI in the right spot and speeds up time for image
 		// to appear on GUI
 		repaint();
-		
-		// System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+
+		// System.out.println("### DISPLAY IMAGE LOAD TIME IN ms " + (mili2 - mili1) + "
+		// repaint");
 	}
 }

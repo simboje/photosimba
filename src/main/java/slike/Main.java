@@ -16,13 +16,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-public class Main {
+public class Main
+{
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 
-		try {
+		try
+		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 
@@ -53,9 +57,11 @@ public class Main {
 		frame.setMinimumSize(new Dimension(800, 600));
 		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
-		frame.addWindowListener(new java.awt.event.WindowAdapter() {
+		frame.addWindowListener(new java.awt.event.WindowAdapter()
+		{
 			@Override
-			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+			public void windowClosing(java.awt.event.WindowEvent windowEvent)
+			{
 				imagePanel.shutdownThread();
 			}
 		});
