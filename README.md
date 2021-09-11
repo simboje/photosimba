@@ -25,5 +25,6 @@ A standard Maven project, you can build it from cmd using maven or use Eclipse a
 * Ctrl + Shift + C - copies image file to clipboard (can be pasted in file explorer)
 
 ## Credits
+Library for reading metadata about image orientation [metadata-extractor](https://github.com/drewnoakes/metadata-extractor).
 Image drag and zoom code taken from [this example](https://stackoverflow.com/questions/58021358/java-how-to-do-image-manipulation-pan-zoom-flip-and-rotate).
 Copy image to clipboard [example](https://stackoverflow.com/questions/4552045/copy-bufferedimage-to-clipboard) , copy file to clipboard [example](https://stackoverflow.com/questions/31798646/can-java-system-clipboard-copy-a-file)
