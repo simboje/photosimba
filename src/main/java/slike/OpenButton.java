@@ -10,10 +10,12 @@ import javax.swing.JFileChooser;
 @SuppressWarnings("serial")
 public class OpenButton extends JButton {
 
+	private File lastVisitedLocation;
+
 	public OpenButton(String string, ImagePanel imagePanel) {
-		
+
 		super(string);
-		
+
 		this.setFocusable(false);
 		this.addMouseListener(new MouseAdapter() {
 
@@ -22,19 +24,27 @@ public class OpenButton extends JButton {
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-				// TODO nothing is selected by default and file chooser craps itself and OK button
-				// does not work
+				// TODO nothing is selected by default and file chooser craps itself and OK
+				// button does not work
 				ImageFilenameFilter imageFilenameFilter = new ImageFilenameFilter();
+				if (lastVisitedLocation != null) {
+					fileChooser.setCurrentDirectory(lastVisitedLocation);
+				}
+
 				File[] file_list;
 				int result = fileChooser.showOpenDialog(getParent());
-				File selectedDir = fileChooser.getSelectedFile();
+				File selectedFileOrDir = fileChooser.getSelectedFile();
 				if (result == JFileChooser.APPROVE_OPTION) {
-					if (selectedDir.isDirectory())
-						file_list = selectedDir.listFiles(imageFilenameFilter);
-					else {
-						file_list = selectedDir.getParentFile().listFiles(imageFilenameFilter);
+					if (selectedFileOrDir.isDirectory()) {
+						file_list = selectedFileOrDir.listFiles(imageFilenameFilter);
+						lastVisitedLocation = selectedFileOrDir.getParentFile();
 					}
-					
+
+					else {
+						file_list = selectedFileOrDir.getParentFile().listFiles(imageFilenameFilter);
+						lastVisitedLocation = selectedFileOrDir.getParentFile().getParentFile();
+					}
+
 					imagePanel.loadFiles(file_list);
 				}
 			}
