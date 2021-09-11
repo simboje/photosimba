@@ -164,7 +164,9 @@ public class ImagePanel extends JPanel {
 
 	private BufferedImage getDisplayImage(int currentFile) {
 		init = true;
-		return imageLoaderThread.getBufferedImage(currentFile);
+		ImageData imageData = imageLoaderThread.getBufferedImage(currentFile);
+		this.rotateCounter = imageData.getRotation();
+		return imageData.getImage();
 	}
 
 	@Override
