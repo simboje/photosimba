@@ -29,7 +29,7 @@ public class Main {
 		JFrame frame = new JFrame("SLIKE");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		ImageIcon icon = new ImageIcon("1x1.png");
+		ImageIcon icon = new ImageIcon("program_icon.png");
 
 		JPanel topPanel = new JPanel();
 		topPanel.setBackground(Color.WHITE);
