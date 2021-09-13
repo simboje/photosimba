@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.simboje</groupId>
 	<artifactId>slike</artifactId>
-	<version>0.9</version>
+	<version>1.0</version>
 
 	<build>
 		<plugins>
@@ -19,6 +19,7 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
 		</plugins>
