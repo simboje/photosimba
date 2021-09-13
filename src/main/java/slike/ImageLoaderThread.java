@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ public class ImageLoaderThread extends Thread
 				imagePanel.notifyAboutNewImage();
 			} else
 			{
+				clearImageMap();
 				loadImageFile(currentFile - 1);
 				loadImageFile(currentFile + 1);
 			}
@@ -60,6 +62,15 @@ public class ImageLoaderThread extends Thread
 		}
 
 		System.out.println("Shutting down thread...");
+	}
+
+	private void clearImageMap()
+	{
+		if(IMAGES_MAP.size() > 40)
+		{
+			IMAGES_MAP.clear();
+		}
+		
 	}
 
 	public ImageData getBufferedImage(int fileIndex)
