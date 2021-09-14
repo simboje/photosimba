@@ -1,13 +1,9 @@
 package slike;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Inet4Address;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,7 +68,6 @@ public class ImageLoaderThread extends Thread
 		{
 			IMAGES_MAP.clear();
 		}
-
 	}
 
 	public ImageData getBufferedImage(int fileIndex)
@@ -94,26 +89,25 @@ public class ImageLoaderThread extends Thread
 			{
 				try
 				{
-					// BufferedImage image = null;
+					int rotation=0;
+					long mili1 = System.currentTimeMillis();
 					ImageData imageData;
 					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
 					{
+
 						imageData = new ImageData(ImageIO.read(stream));
 						this.IMAGES_MAP.put(imagePanel.getFile_list().get(index), imageData);
 
 					}
 					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
 					{
-						long mili1 = System.currentTimeMillis();
-
-						//InputStream imageFileStream = new FileInputStream(imagePanel.getFile_list().get(index));
-						int rotation = readImageInformation(stream);
+						rotation = readImageInformation(stream);
 						imageData.setRotation(rotation);
-
-						long mili2 = System.currentTimeMillis();
-						System.out.println(imagePanel.getFile_list().get(index).getName() + " EXIF time ms "
-								+ (mili2 - mili1) + " rotation " + rotation);
 					}
+
+					long mili2 = System.currentTimeMillis();
+					System.out.println(imagePanel.getFile_list().get(index).getName() + " EXIF time ms "
+							+ (mili2 - mili1) + " rotation " + rotation);
 
 				} catch (IOException e)
 				{
