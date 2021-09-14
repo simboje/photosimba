@@ -23,6 +23,7 @@ A standard Maven project, you can build it from cmd using maven or use Eclipse a
 * S or Down arrow - rotate image clockwise (does not save changes to image file)
 * Ctrl + C - copies image to clipboard (can be pasted to other image/chat programs)
 * Ctrl + Shift + C - copies image file to clipboard (can be pasted in file explorer)
+* Del - send file to Recycle Bin
 
 ## Credits
 Library for reading metadata about image orientation [metadata-extractor](https://github.com/drewnoakes/metadata-extractor).<br/>
