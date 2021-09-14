@@ -9,7 +9,7 @@ Intention is to create something to be used instead of default Photos applicatio
 * Background thread for image loading
 
 ## How to build and use
-A standard Maven project, you can build it from cmd using maven or use Eclipse and launch it from there. Currently only buildable as jar but [launch4j](http://launch4j.sourceforge.net/docs.html) config will be added later in order to get .exe for Windows users. If you have Maven installed (and on PATH) you can build the project from cmd using `mvn clean verify`.
+A standard Maven project, you can build it from cmd using maven or use Eclipse and launch it from there. Currently only buildable as jar but [launch4j](http://launch4j.sourceforge.net/docs.html) config will be added later in order to get .exe for Windows users. If you have Maven installed (and on PATH) you can build the project from cmd using `mvn clean compile assembly:single`.
 
 ## Mouse controls
 * Left button drag - drag image
@@ -25,6 +25,7 @@ A standard Maven project, you can build it from cmd using maven or use Eclipse a
 * Ctrl + Shift + C - copies image file to clipboard (can be pasted in file explorer)
 
 ## Credits
-Library for reading metadata about image orientation [metadata-extractor](https://github.com/drewnoakes/metadata-extractor).
-Image drag and zoom code taken from [this example](https://stackoverflow.com/questions/58021358/java-how-to-do-image-manipulation-pan-zoom-flip-and-rotate).
-Copy image to clipboard [example](https://stackoverflow.com/questions/4552045/copy-bufferedimage-to-clipboard) , copy file to clipboard [example](https://stackoverflow.com/questions/31798646/can-java-system-clipboard-copy-a-file)
+Library for reading metadata about image orientation [metadata-extractor](https://github.com/drewnoakes/metadata-extractor).<br/>
+Java Native Access (JNA) used for sending files to recycle bin [JNA GitHub page](https://github.com/java-native-access/jna)<br/>
+Image drag and zoom code taken from [this example](https://stackoverflow.com/questions/58021358/java-how-to-do-image-manipulation-pan-zoom-flip-and-rotate).<br/>
+Copy image to clipboard [example](https://stackoverflow.com/questions/4552045/copy-bufferedimage-to-clipboard) , copy file to clipboard [example](https://stackoverflow.com/questions/31798646/can-java-system-clipboard-copy-a-file)<br/>
