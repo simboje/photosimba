@@ -48,14 +48,13 @@ public class ImageLoaderThread extends Thread
 				clearImageMap();
 				loadImageFile(currentFile - 1);
 				loadImageFile(currentFile + 1);
-			}
-
-			try
-			{
-				Thread.sleep(50);
-			} catch (InterruptedException e)
-			{
-				e.printStackTrace();
+				try
+				{
+					Thread.sleep(50);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 
