@@ -2,8 +2,10 @@ package slike;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,45 +68,53 @@ public class ImageLoaderThread extends Thread
 
 	private void clearImageMap()
 	{
-		if(IMAGES_MAP.size() > 40)
+		if (IMAGES_MAP.size() > 40)
 		{
 			IMAGES_MAP.clear();
 		}
-		
+
 	}
 
 	public ImageData getBufferedImage(int fileIndex)
 	{
 		this.currentFile = fileIndex;
 
-		if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list()[fileIndex]))
+		if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list().get(currentFile)))
 			loadImageFile(fileIndex);
 
-		return this.IMAGES_MAP.get(imagePanel.getFile_list()[fileIndex]);
+		return this.IMAGES_MAP.get(imagePanel.getFile_list().get(currentFile));
 	}
 
 	private void loadImageFile(int index)
 	{
 
-		if (index >= 0 && index < imagePanel.getFile_list().length)
+		if (index >= 0 && index < imagePanel.getFile_list().size())
 		{
-			if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list()[index]))
+			if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list().get(index)))
 			{
 				try
 				{
-					ImageData imageData = new ImageData(ImageIO.read(imagePanel.getFile_list()[index]));
-					this.IMAGES_MAP.put(imagePanel.getFile_list()[index], imageData);
+					// BufferedImage image = null;
+					ImageData imageData;
+					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
+					{
+						imageData = new ImageData(ImageIO.read(stream));
+						this.IMAGES_MAP.put(imagePanel.getFile_list().get(index), imageData);
 
-					long mili1 = System.currentTimeMillis();
+					}
+					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
+					{
+						long mili1 = System.currentTimeMillis();
 
-					byte[] fileContent = Files.readAllBytes(imagePanel.getFile_list()[index].toPath());
-					ByteArrayInputStream bais2 = new ByteArrayInputStream(fileContent);
-					int rotation = readImageInformation(bais2);
-					imageData.setRotation(rotation);
+						//InputStream imageFileStream = new FileInputStream(imagePanel.getFile_list().get(index));
+						int rotation = readImageInformation(stream);
+						imageData.setRotation(rotation);
 
-					long mili2 = System.currentTimeMillis();
-					System.out.println(imagePanel.getFile_list()[index].getName() + " EXIF time ms " + (mili2 - mili1)
-							+ " rotation " + rotation);
+						long mili2 = System.currentTimeMillis();
+						System.out.println(imagePanel.getFile_list().get(index).getName() + " EXIF time ms "
+								+ (mili2 - mili1) + " rotation " + rotation);
+					}
+
 				} catch (IOException e)
 				{
 					e.printStackTrace();
@@ -157,6 +167,12 @@ public class ImageLoaderThread extends Thread
 		}
 
 		return orientation;
+	}
+
+	public void removeImage(File file)
+	{
+		this.IMAGES_MAP.remove(file);
+
 	}
 
 }
