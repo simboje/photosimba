@@ -3,8 +3,12 @@ package slike;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
@@ -87,7 +91,7 @@ public class ImagePanel extends JPanel
 			public void componentResized(ComponentEvent e)
 			{
 				init = true;
-				repaint();
+				custompaint();
 			}
 		});
 
@@ -103,7 +107,7 @@ public class ImagePanel extends JPanel
 				} else if (e.getButton() == MouseEvent.BUTTON2)
 				{ // scroll button click - reset image to initial size
 					init = true;
-					repaint();
+					custompaint();
 				}
 
 			}
@@ -151,12 +155,12 @@ public class ImagePanel extends JPanel
 					{ // w or UP - rotate counter clockwise
 						coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter--;
-						repaint();
+						custompaint();
 					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
 					{ // s or DOWN - rotate clockwise
 						coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter++;
-						repaint();
+						custompaint();
 					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
 					{
 						// c = 67, copy file to clipboard
@@ -202,7 +206,7 @@ public class ImagePanel extends JPanel
 		{
 			imageLoaderThread.setAlive(false);
 			displayImage = null;
-			repaint();
+			custompaint();
 			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
 		}
 	}
@@ -263,6 +267,7 @@ public class ImagePanel extends JPanel
 		if (displayImage != null)
 		{
 			Graphics2D g2 = (Graphics2D) g;
+			
 			// g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
 			if (init)
@@ -281,6 +286,10 @@ public class ImagePanel extends JPanel
 
 			g2.dispose();
 		}
+	}
+	
+	protected void custompaint() {
+		paintImmediately(0, 0, this.getWidth(), this.getHeight());
 	}
 
 	private AffineTransform calculateScale()
@@ -327,7 +336,7 @@ public class ImagePanel extends JPanel
 			coordTransform.translate(dx, dy);
 			dragStartScreen = dragEndScreen;
 			dragEndScreen = null;
-			repaint();
+			custompaint();
 		} catch (NoninvertibleTransformException ex)
 		{
 			ex.printStackTrace();
@@ -349,7 +358,7 @@ public class ImagePanel extends JPanel
 					coordTransform.scale(1 / zoomMultiplicationFactor, 1 / zoomMultiplicationFactor);
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-					repaint();
+					custompaint();
 				}
 			} else
 			{
@@ -360,7 +369,7 @@ public class ImagePanel extends JPanel
 					coordTransform.scale(zoomMultiplicationFactor, zoomMultiplicationFactor);
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-					repaint();
+					custompaint();
 				}
 			}
 		} catch (NoninvertibleTransformException ex)
@@ -423,11 +432,9 @@ public class ImagePanel extends JPanel
 	{
 		long mili1 = System.currentTimeMillis();
 		displayImage = getDisplayImage(currentFile); // show first image
-		long mili2 = System.currentTimeMillis();
-		// repaint seems to kick the GUI in the right spot and speeds up time for image
-		// to appear on GUI
-		repaint();
+		custompaint();
+		long mili2 = System.currentTimeMillis();		
 
-//		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " custom paint");
 	}
 }
