@@ -30,10 +30,18 @@ public class ImageLoaderThread extends Thread
 
 	private Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
 	private boolean alive;
-
+	
+	GraphicsEnvironment env;
+	GraphicsDevice device;
+	GraphicsConfiguration config;
+	
 	public ImageLoaderThread(ImagePanel imagePanel)
 	{
 		this.imagePanel = imagePanel;
+		
+		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	    device = env.getDefaultScreenDevice();
+	    config = device.getDefaultConfiguration();
 
 		alive = true;
 	}
@@ -112,9 +120,6 @@ public class ImageLoaderThread extends Thread
 						imageData.setRotation(rotation);
 					}
 					
-					GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				    GraphicsDevice device = env.getDefaultScreenDevice();
-				    GraphicsConfiguration config = device.getDefaultConfiguration();
 				    BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(), imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
 				    Graphics g = buffy.getGraphics();
 				    g.drawImage(imageData.getImage(),0,0,imagePanel);
