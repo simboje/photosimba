@@ -1,5 +1,11 @@
 package slike;
 
+import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Transparency;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,9 +31,17 @@ public class ImageLoaderThread extends Thread
 	private Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
 	private boolean alive;
 
+	GraphicsEnvironment env;
+	GraphicsDevice device;
+	GraphicsConfiguration config;
+
 	public ImageLoaderThread(ImagePanel imagePanel)
 	{
 		this.imagePanel = imagePanel;
+
+		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		device = env.getDefaultScreenDevice();
+		config = device.getDefaultConfiguration();
 
 		alive = true;
 	}
@@ -48,9 +62,11 @@ public class ImageLoaderThread extends Thread
 				clearImageMap();
 				loadImageFile(currentFile - 1);
 				loadImageFile(currentFile + 1);
+				loadImageFile(currentFile - 2);
+				loadImageFile(currentFile + 2);
 				try
 				{
-					Thread.sleep(50);
+					Thread.sleep(5);
 				} catch (InterruptedException e)
 				{
 					e.printStackTrace();
@@ -88,7 +104,7 @@ public class ImageLoaderThread extends Thread
 			{
 				try
 				{
-					int rotation=0;
+					int rotation = 0;
 					long mili1 = System.currentTimeMillis();
 					ImageData imageData;
 					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
@@ -104,9 +120,15 @@ public class ImageLoaderThread extends Thread
 						imageData.setRotation(rotation);
 					}
 
+					BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
+							imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
+					Graphics g = buffy.getGraphics();
+					g.drawImage(imageData.getImage(), 0, 0, imagePanel);
+					imageData.setImage(buffy);
+
 					long mili2 = System.currentTimeMillis();
-					System.out.println(imagePanel.getFile_list().get(index).getName() + " EXIF time ms "
-							+ (mili2 - mili1) + " rotation " + rotation);
+//					System.out.println(imagePanel.getFile_list().get(index).getName() + " EXIF time ms "
+//							+ (mili2 - mili1) + " rotation " + rotation);
 
 				} catch (IOException e)
 				{

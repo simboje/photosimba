@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
@@ -13,7 +15,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import com.sun.jna.platform.FileUtils;
 
@@ -48,18 +50,27 @@ public class ImagePanel extends JPanel
 
 	private int zoomLevel = 0;
 	private int minZoomLevel = -20;
-	private int maxZoomLevel = 10;
+	private int maxZoomLevel = 20;
 	private double zoomMultiplicationFactor = 1.2;
 
 	ImageLoaderThread imageLoaderThread;
 	private int rotateCounter = 0;
 
 	JLabel fileIndexLabel;
+	JLabel fileNameLabel;
 
-	public ImagePanel(String[] args, JLabel fileIndexLabel)
+	private WheelHandler wheelHandler = new WheelHandler();
+	private Timer wheelMovementTimer;
+	public static final int TIMER_DELAY = 100;
+
+	private boolean zoomStopped = true;
+	protected boolean dragStopped = true;
+
+	public ImagePanel(String[] args, JLabel fileIndexLabel, JLabel fileNameLabel)
 	{
 
 		this.fileIndexLabel = fileIndexLabel;
+		this.fileNameLabel = fileNameLabel;
 
 		if (args.length == 1)
 		{
@@ -76,6 +87,7 @@ public class ImagePanel extends JPanel
 			{
 				displayImageAndMeasureTime();
 				fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+				fileNameLabel.setText(file_list.get(currentFile).getName());
 			}
 		}
 
@@ -88,11 +100,20 @@ public class ImagePanel extends JPanel
 			{
 				init = true;
 				repaint();
+//				custompaint();
 			}
 		});
 
 		this.addMouseListener(new MouseAdapter()
 		{
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				dragStopped = true;
+				repaint();
+				super.mouseReleased(e);
+			}
+
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
@@ -104,6 +125,7 @@ public class ImagePanel extends JPanel
 				{ // scroll button click - reset image to initial size
 					init = true;
 					repaint();
+//					custompaint();
 				}
 
 			}
@@ -113,17 +135,12 @@ public class ImagePanel extends JPanel
 			@Override
 			public void mouseDragged(MouseEvent e)
 			{
+				dragStopped = false;
 				pan(e);
 			}
 		});
-		this.addMouseWheelListener(new MouseWheelListener()
-		{
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e)
-			{
-				zoom(e);
-			}
-		});
+
+		addMouseWheelListener(wheelHandler);
 
 		this.addKeyListener(new KeyAdapter()
 		{
@@ -139,6 +156,7 @@ public class ImagePanel extends JPanel
 						{
 							currentFile--;
 							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+							fileNameLabel.setText(file_list.get(currentFile).getName());
 						}
 					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
 					{ // go right
@@ -146,17 +164,20 @@ public class ImagePanel extends JPanel
 						{
 							currentFile++;
 							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+							fileNameLabel.setText(file_list.get(currentFile).getName());
 						}
 					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
 					{ // w or UP - rotate counter clockwise
 						coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter--;
 						repaint();
+//						custompaint();
 					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
 					{ // s or DOWN - rotate clockwise
 						coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter++;
 						repaint();
+//						custompaint();
 					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
 					{
 						// c = 67, copy file to clipboard
@@ -190,6 +211,34 @@ public class ImagePanel extends JPanel
 		});
 	}
 
+	private class WheelHandler extends MouseAdapter
+	{
+
+		@Override
+		public void mouseWheelMoved(MouseWheelEvent e)
+		{
+			zoomStopped = false;
+			zoom(e);
+			if (wheelMovementTimer != null && wheelMovementTimer.isRunning())
+			{
+				wheelMovementTimer.stop();
+			}
+			wheelMovementTimer = new Timer(TIMER_DELAY, new WheelMovementTimerActionListener());
+			wheelMovementTimer.setRepeats(false);
+			wheelMovementTimer.start();
+		}
+	}
+
+	private class WheelMovementTimerActionListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			zoomStopped = true;
+			repaint();
+		}
+	}
+
 	protected void displayNextImage()
 	{
 		if (file_list.size() > 0)
@@ -197,13 +246,16 @@ public class ImagePanel extends JPanel
 			if (!(currentFile < file_list.size()))
 				currentFile--;
 			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+			fileNameLabel.setText(file_list.get(currentFile).getName());
 			displayImageAndMeasureTime();
 		} else
 		{
 			imageLoaderThread.setAlive(false);
 			displayImage = null;
 			repaint();
+//			custompaint();
 			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
+			fileNameLabel.setText(file_list.get(currentFile).getName());
 		}
 	}
 
@@ -263,13 +315,21 @@ public class ImagePanel extends JPanel
 		if (displayImage != null)
 		{
 			Graphics2D g2 = (Graphics2D) g;
-			// g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+			if (zoomStopped && dragStopped)
+			{ // performance reasons, only do this when user stops zooming or dragging
+				// otherwise it feels really sluggish
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			}
 
 			if (init)
 			{
+				zoomLevel = 0;
 				AffineTransform at = calculateScale();
 				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 				g2.setTransform(at);
+
 				init = false;
 				coordTransform = g2.getTransform();
 			} else
@@ -281,6 +341,11 @@ public class ImagePanel extends JPanel
 
 			g2.dispose();
 		}
+	}
+
+	protected void custompaint()
+	{
+		paintImmediately(0, 0, this.getWidth(), this.getHeight());
 	}
 
 	private AffineTransform calculateScale()
@@ -328,6 +393,7 @@ public class ImagePanel extends JPanel
 			dragStartScreen = dragEndScreen;
 			dragEndScreen = null;
 			repaint();
+//			custompaint();
 		} catch (NoninvertibleTransformException ex)
 		{
 			ex.printStackTrace();
@@ -350,6 +416,7 @@ public class ImagePanel extends JPanel
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
+//					custompaint();
 				}
 			} else
 			{
@@ -361,6 +428,7 @@ public class ImagePanel extends JPanel
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
+//					custompaint();
 				}
 			}
 		} catch (NoninvertibleTransformException ex)
@@ -407,6 +475,7 @@ public class ImagePanel extends JPanel
 			}
 
 			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+			fileNameLabel.setText(file_list.get(currentFile).getName());
 		} else
 		{
 			fileIndexLabel.setText("Selected directory has no image files!");
@@ -423,11 +492,10 @@ public class ImagePanel extends JPanel
 	{
 		long mili1 = System.currentTimeMillis();
 		displayImage = getDisplayImage(currentFile); // show first image
-		long mili2 = System.currentTimeMillis();
-		// repaint seems to kick the GUI in the right spot and speeds up time for image
-		// to appear on GUI
 		repaint();
+//		custompaint();
+		long mili2 = System.currentTimeMillis();
 
-//		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " repaint");
+		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " custom paint");
 	}
 }
