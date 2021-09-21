@@ -39,8 +39,9 @@ public class Main
 		topPanel.setBackground(Color.WHITE);
 
 		JLabel fileIndexLabel = new JLabel("0/0");
+		JLabel fileNameLabel = new JLabel("No file is loaded.");
 
-		ImagePanel imagePanel = new ImagePanel(args, fileIndexLabel);
+		ImagePanel imagePanel = new ImagePanel(args, fileIndexLabel, fileNameLabel);
 		imagePanel.setBackground(Color.WHITE);
 		imagePanel.setFocusable(true);
 		imagePanel.requestFocusInWindow();
@@ -49,6 +50,8 @@ public class Main
 
 		topPanel.add(openButton, FlowLayout.LEFT);
 		topPanel.add(fileIndexLabel, FlowLayout.CENTER);
+		topPanel.add(fileNameLabel, FlowLayout.RIGHT);
+		
 		frame.add(topPanel, BorderLayout.PAGE_START);
 		frame.add(imagePanel, BorderLayout.CENTER);
 

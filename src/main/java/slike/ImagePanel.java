@@ -57,6 +57,7 @@ public class ImagePanel extends JPanel
 	private int rotateCounter = 0;
 
 	JLabel fileIndexLabel;
+	JLabel fileNameLabel;
 	
     private WheelHandler wheelHandler = new WheelHandler();
     private Timer wheelMovementTimer;
@@ -65,10 +66,12 @@ public class ImagePanel extends JPanel
     private boolean zoomStopped = true;
 	protected boolean dragStopped = true;
 
-	public ImagePanel(String[] args, JLabel fileIndexLabel)
+
+	public ImagePanel(String[] args, JLabel fileIndexLabel, JLabel fileNameLabel)
 	{
 
 		this.fileIndexLabel = fileIndexLabel;
+		this.fileNameLabel = fileNameLabel;
 
 		if (args.length == 1)
 		{
@@ -85,6 +88,7 @@ public class ImagePanel extends JPanel
 			{
 				displayImageAndMeasureTime();
 				fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+				fileNameLabel.setText(file_list.get(currentFile).getName());
 			}
 		}
 
@@ -154,6 +158,7 @@ public class ImagePanel extends JPanel
 						{
 							currentFile--;
 							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+							fileNameLabel.setText(file_list.get(currentFile).getName());
 						}
 					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
 					{ // go right
@@ -161,6 +166,7 @@ public class ImagePanel extends JPanel
 						{
 							currentFile++;
 							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+							fileNameLabel.setText(file_list.get(currentFile).getName());
 						}
 					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
 					{ // w or UP - rotate counter clockwise
@@ -238,6 +244,7 @@ public class ImagePanel extends JPanel
 			if (!(currentFile < file_list.size()))
 				currentFile--;
 			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+			fileNameLabel.setText(file_list.get(currentFile).getName());
 			displayImageAndMeasureTime();
 		} else
 		{
@@ -246,6 +253,7 @@ public class ImagePanel extends JPanel
 			repaint();
 //			custompaint();
 			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
+			fileNameLabel.setText(file_list.get(currentFile).getName());
 		}
 	}
 
@@ -464,6 +472,7 @@ public class ImagePanel extends JPanel
 			}
 
 			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+			fileNameLabel.setText(file_list.get(currentFile).getName());
 		} else
 		{
 			fileIndexLabel.setText("Selected directory has no image files!");
