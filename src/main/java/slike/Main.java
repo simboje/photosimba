@@ -4,12 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -51,7 +45,7 @@ public class Main
 		topPanel.add(openButton, FlowLayout.LEFT);
 		topPanel.add(fileIndexLabel, FlowLayout.CENTER);
 		topPanel.add(fileNameLabel, FlowLayout.RIGHT);
-		
+
 		frame.add(topPanel, BorderLayout.PAGE_START);
 		frame.add(imagePanel, BorderLayout.CENTER);
 

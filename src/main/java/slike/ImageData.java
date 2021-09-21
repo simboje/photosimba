@@ -27,7 +27,7 @@ public class ImageData
 	{
 		return image;
 	}
-	
+
 	public void setImage(BufferedImage image)
 	{
 		this.image = image;
