@@ -58,14 +58,13 @@ public class ImagePanel extends JPanel
 
 	JLabel fileIndexLabel;
 	JLabel fileNameLabel;
-	
-    private WheelHandler wheelHandler = new WheelHandler();
-    private Timer wheelMovementTimer;
-    public static final int TIMER_DELAY = 100;
-    
-    private boolean zoomStopped = true;
-	protected boolean dragStopped = true;
 
+	private WheelHandler wheelHandler = new WheelHandler();
+	private Timer wheelMovementTimer;
+	public static final int TIMER_DELAY = 100;
+
+	private boolean zoomStopped = true;
+	protected boolean dragStopped = true;
 
 	public ImagePanel(String[] args, JLabel fileIndexLabel, JLabel fileNameLabel)
 	{
@@ -140,9 +139,8 @@ public class ImagePanel extends JPanel
 				pan(e);
 			}
 		});
-		
+
 		addMouseWheelListener(wheelHandler);
-	
 
 		this.addKeyListener(new KeyAdapter()
 		{
@@ -212,30 +210,34 @@ public class ImagePanel extends JPanel
 
 		});
 	}
-	
-    private class WheelHandler extends MouseAdapter {
-        
+
+	private class WheelHandler extends MouseAdapter
+	{
 
 		@Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-        	zoomStopped = false;
-        	zoom(e);
-            if (wheelMovementTimer != null && wheelMovementTimer.isRunning()) {
-                wheelMovementTimer.stop();
-            }
-            wheelMovementTimer = new Timer(TIMER_DELAY, new WheelMovementTimerActionListener());
-            wheelMovementTimer.setRepeats(false);
-            wheelMovementTimer.start();
-        }
-    }
+		public void mouseWheelMoved(MouseWheelEvent e)
+		{
+			zoomStopped = false;
+			zoom(e);
+			if (wheelMovementTimer != null && wheelMovementTimer.isRunning())
+			{
+				wheelMovementTimer.stop();
+			}
+			wheelMovementTimer = new Timer(TIMER_DELAY, new WheelMovementTimerActionListener());
+			wheelMovementTimer.setRepeats(false);
+			wheelMovementTimer.start();
+		}
+	}
 
-    private class WheelMovementTimerActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-        	zoomStopped = true;
-        	repaint();
-        }
-    }
+	private class WheelMovementTimerActionListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			zoomStopped = true;
+			repaint();
+		}
+	}
 
 	protected void displayNextImage()
 	{
@@ -313,14 +315,14 @@ public class ImagePanel extends JPanel
 		if (displayImage != null)
 		{
 			Graphics2D g2 = (Graphics2D) g;
-			
-			if(zoomStopped && dragStopped)
-			{	// performance reasons, only do this when user stops zooming or dragging
+
+			if (zoomStopped && dragStopped)
+			{ // performance reasons, only do this when user stops zooming or dragging
 				// otherwise it feels really sluggish
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			}
-			
+
 			if (init)
 			{
 				zoomLevel = 0;
@@ -340,8 +342,9 @@ public class ImagePanel extends JPanel
 			g2.dispose();
 		}
 	}
-	
-	protected void custompaint() {
+
+	protected void custompaint()
+	{
 		paintImmediately(0, 0, this.getWidth(), this.getHeight());
 	}
 
@@ -491,7 +494,7 @@ public class ImagePanel extends JPanel
 		displayImage = getDisplayImage(currentFile); // show first image
 		repaint();
 //		custompaint();
-		long mili2 = System.currentTimeMillis();		
+		long mili2 = System.currentTimeMillis();
 
 		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " custom paint");
 	}
