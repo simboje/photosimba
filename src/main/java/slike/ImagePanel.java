@@ -3,12 +3,8 @@ package slike;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -19,7 +15,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -55,7 +50,7 @@ public class ImagePanel extends JPanel
 
 	private int zoomLevel = 0;
 	private int minZoomLevel = -20;
-	private int maxZoomLevel = 10;
+	private int maxZoomLevel = 20;
 	private double zoomMultiplicationFactor = 1.2;
 
 	ImageLoaderThread imageLoaderThread;
@@ -101,7 +96,8 @@ public class ImagePanel extends JPanel
 			public void componentResized(ComponentEvent e)
 			{
 				init = true;
-				custompaint();
+				repaint();
+//				custompaint();
 			}
 		});
 
@@ -112,7 +108,6 @@ public class ImagePanel extends JPanel
 			{
 				dragStopped = true;
 				repaint();
-				fileIndexLabel.setText("D stop");
 				super.mouseReleased(e);
 			}
 
@@ -126,7 +121,8 @@ public class ImagePanel extends JPanel
 				} else if (e.getButton() == MouseEvent.BUTTON2)
 				{ // scroll button click - reset image to initial size
 					init = true;
-					custompaint();
+					repaint();
+//					custompaint();
 				}
 
 			}
@@ -170,12 +166,14 @@ public class ImagePanel extends JPanel
 					{ // w or UP - rotate counter clockwise
 						coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter--;
-						custompaint();
+						repaint();
+//						custompaint();
 					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
 					{ // s or DOWN - rotate clockwise
 						coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 						rotateCounter++;
-						custompaint();
+						repaint();
+//						custompaint();
 					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
 					{
 						// c = 67, copy file to clipboard
@@ -216,7 +214,6 @@ public class ImagePanel extends JPanel
         public void mouseWheelMoved(MouseWheelEvent e) {
         	zoomStopped = false;
         	zoom(e);
-            fileIndexLabel.setText("Moving");
             if (wheelMovementTimer != null && wheelMovementTimer.isRunning()) {
                 wheelMovementTimer.stop();
             }
@@ -229,7 +226,6 @@ public class ImagePanel extends JPanel
     private class WheelMovementTimerActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-        	fileIndexLabel.setText("Stopped");
         	zoomStopped = true;
         	repaint();
         }
@@ -247,7 +243,8 @@ public class ImagePanel extends JPanel
 		{
 			imageLoaderThread.setAlive(false);
 			displayImage = null;
-			custompaint();
+			repaint();
+//			custompaint();
 			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
 		}
 	}
@@ -318,6 +315,7 @@ public class ImagePanel extends JPanel
 			
 			if (init)
 			{
+				zoomLevel = 0;
 				AffineTransform at = calculateScale();
 				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 				g2.setTransform(at);
@@ -383,7 +381,8 @@ public class ImagePanel extends JPanel
 			coordTransform.translate(dx, dy);
 			dragStartScreen = dragEndScreen;
 			dragEndScreen = null;
-			custompaint();
+			repaint();
+//			custompaint();
 		} catch (NoninvertibleTransformException ex)
 		{
 			ex.printStackTrace();
@@ -481,7 +480,8 @@ public class ImagePanel extends JPanel
 	{
 		long mili1 = System.currentTimeMillis();
 		displayImage = getDisplayImage(currentFile); // show first image
-		custompaint();
+		repaint();
+//		custompaint();
 		long mili2 = System.currentTimeMillis();		
 
 		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " custom paint");
