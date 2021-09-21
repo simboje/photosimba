@@ -9,6 +9,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
@@ -30,6 +32,7 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import com.sun.jna.platform.FileUtils;
 
@@ -59,6 +62,13 @@ public class ImagePanel extends JPanel
 	private int rotateCounter = 0;
 
 	JLabel fileIndexLabel;
+	
+    private WheelHandler wheelHandler = new WheelHandler();
+    private Timer wheelMovementTimer;
+    public static final int TIMER_DELAY = 100;
+    
+    private boolean zoomStopped = true;
+	protected boolean dragStopped = true;
 
 	public ImagePanel(String[] args, JLabel fileIndexLabel)
 	{
@@ -98,6 +108,15 @@ public class ImagePanel extends JPanel
 		this.addMouseListener(new MouseAdapter()
 		{
 			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				dragStopped = true;
+				repaint();
+				fileIndexLabel.setText("D stop");
+				super.mouseReleased(e);
+			}
+
+			@Override
 			public void mousePressed(MouseEvent e)
 			{
 				if (e.getButton() == MouseEvent.BUTTON1)
@@ -117,17 +136,13 @@ public class ImagePanel extends JPanel
 			@Override
 			public void mouseDragged(MouseEvent e)
 			{
+				dragStopped = false;
 				pan(e);
 			}
 		});
-		this.addMouseWheelListener(new MouseWheelListener()
-		{
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e)
-			{
-				zoom(e);
-			}
-		});
+		
+		addMouseWheelListener(wheelHandler);
+	
 
 		this.addKeyListener(new KeyAdapter()
 		{
@@ -193,6 +208,32 @@ public class ImagePanel extends JPanel
 
 		});
 	}
+	
+    private class WheelHandler extends MouseAdapter {
+        
+
+		@Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+        	zoomStopped = false;
+        	zoom(e);
+            fileIndexLabel.setText("Moving");
+            if (wheelMovementTimer != null && wheelMovementTimer.isRunning()) {
+                wheelMovementTimer.stop();
+            }
+            wheelMovementTimer = new Timer(TIMER_DELAY, new WheelMovementTimerActionListener());
+            wheelMovementTimer.setRepeats(false);
+            wheelMovementTimer.start();
+        }
+    }
+
+    private class WheelMovementTimerActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        	fileIndexLabel.setText("Stopped");
+        	zoomStopped = true;
+        	repaint();
+        }
+    }
 
 	protected void displayNextImage()
 	{
@@ -268,14 +309,19 @@ public class ImagePanel extends JPanel
 		{
 			Graphics2D g2 = (Graphics2D) g;
 			
-			 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			 g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
+			if(zoomStopped && dragStopped)
+			{	// performance reasons, only do this when user stops zooming or dragging
+				// otherwise it feels really sluggish
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			}
+			
 			if (init)
 			{
 				AffineTransform at = calculateScale();
 				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 				g2.setTransform(at);
+
 				init = false;
 				coordTransform = g2.getTransform();
 			} else
@@ -359,7 +405,8 @@ public class ImagePanel extends JPanel
 					coordTransform.scale(1 / zoomMultiplicationFactor, 1 / zoomMultiplicationFactor);
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-					custompaint();
+					repaint();
+//					custompaint();
 				}
 			} else
 			{
@@ -370,7 +417,8 @@ public class ImagePanel extends JPanel
 					coordTransform.scale(zoomMultiplicationFactor, zoomMultiplicationFactor);
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-					custompaint();
+					repaint();
+//					custompaint();
 				}
 			}
 		} catch (NoninvertibleTransformException ex)
