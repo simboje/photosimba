@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ public class ImageLoaderThread extends Thread
 	ImagePanel imagePanel;
 
 	private Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
+	private ArrayList<Integer> fileAddHistoryList = new ArrayList<>();
+
 	private boolean alive;
 
 	GraphicsEnvironment env;
@@ -79,9 +82,14 @@ public class ImageLoaderThread extends Thread
 
 	private void clearImageMap()
 	{
-		if (IMAGES_MAP.size() > 40)
+		if (IMAGES_MAP.size() > 10)
 		{
-			IMAGES_MAP.clear();
+			if (IMAGES_MAP.containsKey(imagePanel.file_list.get(fileAddHistoryList.get(0))))
+			{
+				IMAGES_MAP.remove(imagePanel.file_list.get(fileAddHistoryList.get(0)));
+				fileAddHistoryList.remove(0);
+
+			}
 		}
 	}
 
@@ -112,6 +120,7 @@ public class ImageLoaderThread extends Thread
 
 						imageData = new ImageData(ImageIO.read(stream));
 						this.IMAGES_MAP.put(imagePanel.getFile_list().get(index), imageData);
+						fileAddHistoryList.add(index);
 
 					}
 					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
@@ -186,6 +195,7 @@ public class ImageLoaderThread extends Thread
 
 	public void removeImage(File file)
 	{
+		// part of file delete procedure
 		this.IMAGES_MAP.remove(file);
 
 	}
