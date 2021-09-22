@@ -35,6 +35,9 @@ public class ErrorAndLogPanel
 			tree = new JTree();
 			textArea = new JTextArea();
 			scrollPane = new JScrollPane(textArea);
+			
+			textArea.setLineWrap(true);
+			textArea.setWrapStyleWord(true);
 
 			JButton copyButton = new JButton("Copy text to clipboard");
 			copyButton.addMouseListener(new MouseAdapter()

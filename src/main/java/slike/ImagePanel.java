@@ -21,6 +21,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +77,31 @@ public class ImagePanel extends JPanel
 		if (args.length == 1)
 		{
 			File selectedFile = new File(args[0]);
+			if (!selectedFile.exists()) // ok so we have a problem with cyrillic characters
+			{
+				Logger.logMessage("Argument value is " + args[0]
+						+ " but this file does not exist! Usually indicates problem with cyrillic characters in the file path.");
+				Logger.logMessage(
+						"On Windows it can happen that ŠĐŽČĆšđžčć is resolved to ŠÐŽCCšdžcc. Trying to run internal path resolver...");
+				try
+				{
+					selectedFile = fixCyrillicPath(args[0]);
+					if (selectedFile.exists())
+					{
+						Logger.logMessage("Internal cyrillic path resolver was successfull! Resolved file path is: "
+								+ selectedFile.getAbsolutePath());
+					} else
+					{
+						throw new Exception("Resolved file path: " + selectedFile.getAbsolutePath()
+								+ " but this file still does not exist!");
+					}
+
+				} catch (Exception e)
+				{
+					Logger.logException(e);
+				}
+
+			}
 			ImageFilenameFilter imageFilenameFilter = new ImageFilenameFilter();
 			selectedDir = selectedFile.getParentFile();
 
@@ -222,6 +249,57 @@ public class ImagePanel extends JPanel
 			}
 
 		});
+	}
+
+	private File fixCyrillicPath(String args0)
+	{
+		// https://stackoverflow.com/questions/7660651/passing-command-line-unicode-argument-to-java-code
+		// seems that my PC has a lucky locale/encoding setting
+		Path path = Paths.get(args0);
+
+		File rootFile = path.getRoot().toFile();
+		float globalMax = 0;
+
+		for (int k = 0; k < path.getNameCount(); ++k)
+		{
+			String miniPath = rootFile.getPath() + File.separator + path.getName(k);
+			File miniFile = new File(miniPath);
+			if (miniFile.exists())
+			{
+				rootFile = miniFile;
+			} else
+			{
+				Path name = path.getName(k);
+				for (File file : rootFile.listFiles())
+				{
+					if (file.getName().length() == name.getFileName().toString().length())
+					{
+						float countSameLetters = 0.1f; // as soon as the file has same length give it a little bit of
+														// similarity +0.1. For example file "Ć" will have zero same
+														// characters as our args "C", but with this bump it will be the
+														// best candidate and greater than zero which enables us to
+														// return at least some file. It may work or not if we have "Č",
+														// "Ć" files in same directory.
+						for (int i = 0; i < file.getName().length(); i++)
+						{
+							if (file.getName().charAt(i) == name.getFileName().toString().charAt(i))
+							{
+								countSameLetters++;
+							}
+						}
+
+						float localMax = countSameLetters / file.getName().length();
+						if (localMax > globalMax)
+						{
+							globalMax = localMax;
+							rootFile = file;
+						}
+					}
+				}
+			}
+		}
+
+		return rootFile;
 	}
 
 	private class WheelHandler extends MouseAdapter
