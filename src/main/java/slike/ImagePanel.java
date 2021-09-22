@@ -77,18 +77,26 @@ public class ImagePanel extends JPanel
 			File selectedFile = new File(args[0]);
 			ImageFilenameFilter imageFilenameFilter = new ImageFilenameFilter();
 			selectedDir = selectedFile.getParentFile();
-			file_list = new ArrayList<>(Arrays.asList(selectedDir.listFiles(imageFilenameFilter)));
-			currentFile = findFileIndex(file_list, selectedFile);
-			imageLoaderThread = new ImageLoaderThread(this);
-			// start loading images
-			imageLoaderThread.start();
 
-			if (file_list != null)
+			if (selectedDir.exists())
 			{
-				displayImageAndMeasureTime();
-				fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-				fileNameLabel.setText(file_list.get(currentFile).getName());
+				file_list = new ArrayList<>(Arrays.asList(selectedDir.listFiles(imageFilenameFilter)));
+				currentFile = findFileIndex(file_list, selectedFile);
+				imageLoaderThread = new ImageLoaderThread(this);
+				// start loading images
+				imageLoaderThread.start();
+
+				if (file_list != null)
+				{
+					displayImageAndMeasureTime();
+					fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+					fileNameLabel.setText(file_list.get(currentFile).getName());
+				}
+			} else
+			{
+				Logger.logMessage(selectedDir.getAbsolutePath() + " does not exist!");
 			}
+
 		}
 
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -206,6 +214,11 @@ public class ImagePanel extends JPanel
 						displayNextImage();
 					}
 				}
+
+				if (e.getKeyCode() == 81) // Q
+				{
+					ErrorAndLogPanel.updateUI();
+				}
 			}
 
 		});
@@ -268,14 +281,14 @@ public class ImagePanel extends JPanel
 			try
 			{
 				fileUtils.moveToTrash(file_list.get(currentFile));
-				System.out.println("A have trash! Deleted " + file_list.get(currentFile));
+				Logger.logMessage("A have trash! Deleted " + file_list.get(currentFile));
 			} catch (IOException ioe)
 			{
-				ioe.printStackTrace();
+				Logger.logException(ioe);
 			}
 		} else
 		{
-			System.out.println("No Trash available. Failed to delete " + file_list.get(currentFile));
+			Logger.logMessage("No Trash available. Failed to delete " + file_list.get(currentFile));
 		}
 	}
 
@@ -396,7 +409,7 @@ public class ImagePanel extends JPanel
 //			custompaint();
 		} catch (NoninvertibleTransformException ex)
 		{
-			ex.printStackTrace();
+			Logger.logException(ex);
 		}
 	}
 
@@ -433,7 +446,7 @@ public class ImagePanel extends JPanel
 			}
 		} catch (NoninvertibleTransformException ex)
 		{
-			ex.printStackTrace();
+			Logger.logException(ex);
 		}
 	}
 
@@ -490,12 +503,8 @@ public class ImagePanel extends JPanel
 
 	private void displayImageAndMeasureTime()
 	{
-		long mili1 = System.currentTimeMillis();
 		displayImage = getDisplayImage(currentFile); // show first image
 		repaint();
 //		custompaint();
-		long mili2 = System.currentTimeMillis();
-
-		System.out.println("# IMAGE LOAD TIME IN ms " + (mili2 - mili1) + " custom paint");
 	}
 }

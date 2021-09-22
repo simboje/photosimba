@@ -21,7 +21,7 @@ public class Main
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			Logger.logException(e);
 		}
 
 		JFrame frame = new JFrame("SLIKE");

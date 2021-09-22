@@ -62,33 +62,34 @@ public class ImageLoaderThread extends Thread
 				imagePanel.notifyAboutNewImage();
 			} else
 			{
-				clearImageMap();
-				loadImageFile(currentFile - 1);
-				loadImageFile(currentFile + 1);
-				loadImageFile(currentFile - 2);
-				loadImageFile(currentFile + 2);
 				try
 				{
+					clearImageMap();
+					loadImageFile(currentFile - 1);
+					loadImageFile(currentFile + 1);
+					loadImageFile(currentFile - 2);
+					loadImageFile(currentFile + 2);
+
 					Thread.sleep(5);
-				} catch (InterruptedException e)
+				} catch (Exception e)
 				{
-					e.printStackTrace();
+					Logger.logException(e);
 				}
 			}
 		}
 
-		System.out.println("Shutting down thread...");
+		Logger.logMessage("Shutting down thread...");
 	}
 
-	private void clearImageMap()
+	private void clearImageMap() throws Exception
 	{
 		if (IMAGES_MAP.size() > 10)
 		{
 			if (IMAGES_MAP.containsKey(imagePanel.file_list.get(fileAddHistoryList.get(0))))
 			{
+
 				IMAGES_MAP.remove(imagePanel.file_list.get(fileAddHistoryList.get(0)));
 				fileAddHistoryList.remove(0);
-
 			}
 		}
 	}
@@ -136,18 +137,12 @@ public class ImageLoaderThread extends Thread
 					imageData.setImage(buffy);
 
 					long mili2 = System.currentTimeMillis();
-//					System.out.println(imagePanel.getFile_list().get(index).getName() + " EXIF time ms "
-//							+ (mili2 - mili1) + " rotation " + rotation);
+					Logger.logMessage(imagePanel.getFile_list().get(index).getName() + " load time ms "
+							+ (mili2 - mili1) + " , EXIF rotation: " + rotation);
 
-				} catch (IOException e)
+				} catch (Exception e)
 				{
-					e.printStackTrace();
-				} catch (MetadataException e)
-				{
-					e.printStackTrace();
-				} catch (ImageProcessingException e)
-				{
-					e.printStackTrace();
+					Logger.logException(e);
 				}
 			}
 		}
