@@ -1,3 +1,7 @@
+# launch4j - http://launch4j.sourceforge.net/docs.html
+launch4j/*
+build/*
+
 # Eclipse files
 .settings/*
 .classpath

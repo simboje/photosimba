@@ -5,11 +5,35 @@ Intention is to create something to be used instead of default Photos applicatio
 
 ## Feature list
 * Portable, no installation required
-* View, zoom and rotate images
-* Background thread for image loading
+* View, zoom, rotate, delete images
+* Copy image or file to clipboard
+* Background thread for image loading<br>
+Please see mouse and keyboard controls section for more information.
 
-## How to build and use
-A standard Maven project, you can build it from cmd using maven or use Eclipse and launch it from there. Currently only buildable as jar but [launch4j](http://launch4j.sourceforge.net/docs.html) config will be added later in order to get .exe for Windows users. If you have Maven installed (and on PATH) you can build the project from cmd using `mvn clean compile assembly:single`.
+## Prebuilt binaries
+Versions with bundled JRE (better)<br/>
+[Version 1.2](https://1drv.ms/u/s!AhATAQSs_IENgpleIHFsemLA3WTRBQ?e=Vm0zy3)
+
+Old versions using system JRE (here for reference, but have much higher memory usage)<br/>
+[Version 1.1](https://1drv.ms/u/s!AhATAQSs_IENgpld0ZSnAXS7OlxzzQ?e=pKtqqR)<br/>
+[Version 1.0](https://1drv.ms/u/s!AhATAQSs_IENgplcxLilqBBrOUnUAw?e=yciwup)
+
+## How to open/modify or build jar
+A standard Maven project, you can build it from cmd using maven or use Eclipse and launch it from there. If you have Maven installed (and on PATH) you can build the project from cmd using `mvn clean compile assembly:single`. Or in Eclipse create new 'Run Configurations - Maven Build' and in field 'Goals' put 'clean compile assembly:single'
+
+## Packaging jar to exe with custom JRE
+For this you will need [launch4j](http://launch4j.sourceforge.net/docs.html). Version 3.14 is tested so far.<br>
+Basic steps:
+1. Have a working OpenJDK17 on your system (other versions will work but this one is tested)
+2. Download launchj4 and unpack it so that you have the following structure 'slike/launch4j/launch4j.exe'
+3. Run 'package_jre_and_exe.bat' from cmd, it will:<br>
+  3.1 Delete build/* dir if it exists (clean)<br>
+  3.2 Check jlink location and invoke jlink and create build/jre-17 (custom jre that contains only modules required for this program)<br>
+  3.3 Invoke launch4j with config file launch4j_config_jre-17.xml to create appropriate executable build/slike.exe.
+
+Note: entire build/ directory should be packed as zip for a release and it should contain build/slike.exe and build/jre-17 directory.
+Program will run even if build/jre-17 is removed and will use system JRE but this results in slower performance and higher memory usage.
+
 
 ## Mouse controls
 * Left button drag - drag image
