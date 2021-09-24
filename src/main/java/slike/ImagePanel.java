@@ -416,12 +416,9 @@ public class ImagePanel extends JPanel
 
 			if (init)
 			{
-				zoomLevel = 0;
-				AffineTransform at = calculateScale();
-				at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
-				g2.setTransform(at);
-
 				init = false;
+				zoomLevel = 0;
+				g2.setTransform(calculateScale());
 				coordTransform = g2.getTransform();
 			} else
 			{
@@ -446,6 +443,11 @@ public class ImagePanel extends JPanel
 		int y = 0;
 		float xscale = (float) this.getWidth() / displayImage.getWidth();
 		float yscale = (float) this.getHeight() / displayImage.getHeight();
+		if( rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
+		{
+			xscale = (float) this.getWidth() / displayImage.getHeight();
+			yscale = (float) this.getHeight() / displayImage.getWidth();
+		}
 		if (xscale > yscale)
 		{
 			// in this case image is 'taller' than the frame
@@ -455,6 +457,10 @@ public class ImagePanel extends JPanel
 			// yscale
 			// final x value in at will then have expected value
 			x = (int) ((this.getWidth() - displayImage.getWidth() * yscale) / yscale / 2);
+			if( rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
+			{
+				y = (int) ((this.getHeight() - displayImage.getHeight() * yscale) / yscale / 2); // scale fix
+			}
 		}
 
 		else
@@ -463,11 +469,16 @@ public class ImagePanel extends JPanel
 			// need to scale image on y axis
 			at.scale(xscale, xscale);
 			y = (int) ((this.getHeight() - displayImage.getHeight() * xscale) / xscale / 2); // scale fix
+			if( rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
+			{
+				x = (int) ((this.getWidth() - displayImage.getWidth() * xscale) / xscale / 2);
+			}
 		}
 		at.translate(x, y);
+		at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
+		
+		// TODO further test code now that the rotation also plays a role
 
-		// initial testing looks good, image is scaled properly, centered on x or y axis
-		// and fills in frame properly
 		return at;
 	}
 
