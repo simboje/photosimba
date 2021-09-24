@@ -64,7 +64,6 @@ public class ImageLoaderThread extends Thread
 			{
 				try
 				{
-					clearImageMap();
 					loadImageFile(currentFile - 1);
 					loadImageFile(currentFile + 1);
 					loadImageFile(currentFile - 2);
@@ -135,7 +134,7 @@ public class ImageLoaderThread extends Thread
 					Graphics g = buffy.getGraphics();
 					g.drawImage(imageData.getImage(), 0, 0, imagePanel);
 					imageData.setImage(buffy);
-
+					clearImageMap();
 					long mili2 = System.currentTimeMillis();
 					Logger.logMessage(imagePanel.getFile_list().get(index).getName() + " load time ms "
 							+ (mili2 - mili1) + " , EXIF rotation: " + rotation);
