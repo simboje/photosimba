@@ -1,14 +1,13 @@
 # slike
 ## Short description
 A simple image viewer intended to be as simple and fast as possible.
-Intention is to create something to be used instead of default Photos application on Windows 10 as the [problem with arrow keys](https://answers.microsoft.com/en-us/windows/forum/all/windows-10-photos-app-why-cant-i-use-my-arrow-keys/790e786d-b701-48ef-93c5-23d204b4fba4) could not be solved.
-
+Intention is to create something to be used instead of default Photos application on Windows 10 as the [problem with arrow keys](https://answers.microsoft.com/en-us/windows/forum/all/windows-10-photos-app-why-cant-i-use-my-arrow-keys/790e786d-b701-48ef-93c5-23d204b4fba4) could not be solved.<br>
+It is made for Windows users and .exe file is packed for convenience, but .jar is also packed so it can be used on any system that has Java installed. Please note that included JRE is Windows only, on other system jar will run but will use system JRE (must be minimum 1.8). Tested successfully on Ubuntu 18 with OpenJDK11 installed.
 ## Feature list
 * Portable, no installation required
 * View, zoom, rotate, delete images
 * Copy image or file to clipboard
 * Background thread for image loading<br>
-Please see mouse and keyboard controls section for more information.
 
 ## Prebuilt binaries
 Versions with bundled JRE (better)<br/>

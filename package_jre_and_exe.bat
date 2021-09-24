@@ -27,6 +27,7 @@ echo launchj4 needs working Java on system in order to run
 START /WAIT launch4j\launch4j.exe ..\launch4j_config_jre-17.xml
 
 cp program_icon.png build\
+cp target/slike-*.jar build/
 
 echo \n
 REM For whatever reason final check if slike.exe exists will fail without at least a litle bit of waiting
