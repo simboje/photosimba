@@ -1,40 +1,93 @@
 @echo off
 
-echo Before running this script make sure to run maven build 'mvn clean compile assembly:single' and have target/slike-1.x.jar created!
-echo Or in Eclipse create new 'Run Configurations - Maven Build' and in field 'Goals' put 'clean compile assembly:single'
+REM Colour tags for build output
+REM         START   END
+REM RED     [31m   [0m
+REM GREEN   [32m   [0m
+
+REM Check if we can find mvn (maven)
+CALL mvn -version >nul 2>&1 && (
+    echo Find maven:[32m OK [0m
+) || (
+    echo Find maven:[31m ERROR [0m
+    REM Repeat command to get error message in terminal
+    mvn -version
+    goto :error
+)
 
 REM Clean build directory
-rmdir /Q /S build
+CALL rmdir /Q /S build >nul 2>&1 && (
+    echo Clean build/ dir:[32m OK [0m
+) || (
+    echo Clean build/ dir:[31m ERROR [0m
+    rmdir /Q /S build
+    goto :error
+)
 
-echo Built-in JRE from version 1.2 is created using OpenJDK17 and is custom tailored for this application, other versions can work but are not tested. 
-echo In order to have working jlink please install OpenJDK17 (or some other version that has it) and setup environment variables
+REM Built-in JRE from version 1.2 is created using OpenJDK17 and is custom tailored for this application, other versions can work but are not tested.
+REM In order to have working jlink please install OpenJDK17 (or some other version that has it) and setup environment variables
 
-echo Checking jlink location:
-which jlink
-echo "If the previous line is empty is means that JDK is not installed correctly and next command will fail."
+REM Check if we can find mvn (maven)
+CALL jlink -h >nul 2>&1 && (
+    echo Find jlink:[32m OK [0m
+) || (
+    echo Find jlink:[31m ERROR [0m
+    jlink -h
+    goto :error
+)
 
+REM List of dependencies is acquired using "jdeps --list-deps slike-1.2.jar"
+REM Please read https://medium.com/azulsystems/using-jlink-to-build-java-runtimes-for-non-modular-applications-9568c5e70ef4
+REM Invoking jlink to create custom jre for this program
 
-echo List of dependencies is acquired using "jdeps --list-deps slike-1.2.jar"
-echo Please read https://medium.com/azulsystems/using-jlink-to-build-java-runtimes-for-non-modular-applications-9568c5e70ef4
-echo Invoking jlink to create custom jre for this program
-jlink --no-header-files --no-man-pages --compress=2 --strip-debug --add-modules java.base,java.desktop,java.logging --output build\jre-17
-
+CALL jlink --no-header-files --no-man-pages --compress=2 --strip-debug --add-modules java.base,java.desktop,java.logging --output build\jre-17 >nul 2>&1 && (
+    echo jlink create JRE:[32m OK [0m
+) || (
+    echo jlink create JRE:[31m ERROR [0m
+    jlink --no-header-files --no-man-pages --compress=2 --strip-debug --add-modules java.base,java.desktop,java.logging --output build\jre-17
+    goto :error
+)
 REM http://launch4j.sourceforge.net/docs.html
-echo For this step you need to have launch4j directory in the project root (same location as this script), for example directory "slike" should contain:
-echo src/, target/, launch4j/, package_jre_and_exe.bat...
-echo launchj4 needs working Java on system in order to run
+REM For this step you need to have launch4j directory in the project root (same location as this script), for example directory "slike" should contain:
+REM src/, target/, launch4j/, package_jre_and_exe.bat...
+REM launchj4 needs working Java on system in order to run
 
-START /WAIT launch4j\launch4j.exe ..\launch4j_config_jre-17.xml
+REM START /WAIT launch4j\launch4j.exe ..\launch4j_config_jre-17.xml
+CALL launch4j\launch4j.exe ..\launch4j_config_jre-17.xml >nul 2>&1 && (
+    echo launch4j create exe:[32m OK [0m
+) || (
+    echo launch4j create exe:[31m ERROR [0m
+    launch4j\launch4j.exe ..\launch4j_config_jre-17.xml
+    goto :error
+)
 
-cp program_icon.png build\
-cp target/slike-*.jar build/
+CALL cp program_icon.png build\ >nul 2>&1 && (
+    echo cp program_icon.png:[32m OK [0m
+) || (
+    echo cp program_icon.png:[31m ERROR [0m
+    cp program_icon.png build\
+    goto :error
+)
 
-echo \n
+CALL cp target/slike-*.jar build\ >nul 2>&1 && (
+    echo cp target/slike-*.jar build/:[32m OK [0m
+) || (
+    echo cp target/slike-*.jar build/:[31m ERROR [0m
+    cp target/slike-*.jar build/
+    goto :error
+)
+
 REM For whatever reason final check if slike.exe exists will fail without at least a litle bit of waiting
 TIMEOUT /T 3 /NOBREAK
 
 if exist ".\build\slike.exe" (
-	echo SUCCESS - found build\slike.exe, seems that everything worked fine.
+	echo [32m SUCCESS [0m - found build\slike.exe, seems that everything worked fine.
+    exit /b 0
 ) else (
-    echo ERROR - file build\slike.exe not found! Please check this log to find error details.
+    echo [31m ERROR [0m - file build\slike.exe not found! Please check this log to find error details.
+    exit /b 1
 )
+
+:error
+echo [31mFailed with error:[0m %errorlevel%.
+exit /b %errorlevel%
