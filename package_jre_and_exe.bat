@@ -15,6 +15,16 @@ CALL mvn -version >nul 2>&1 && (
     goto :error
 )
 
+REM Build jar with maven
+CALL mvn clean compile assembly:single >nul 2>&1 && (
+    echo Build jar with maven:[32m OK [0m
+) || (
+    echo Build jar with maven:[31m ERROR [0m
+    REM Repeat command to get error message in terminal
+    mvn clean compile assembly:single
+    goto :error
+)
+
 REM Clean build directory
 CALL rmdir /Q /S build >nul 2>&1 && (
     echo Clean build/ dir:[32m OK [0m
@@ -27,7 +37,7 @@ CALL rmdir /Q /S build >nul 2>&1 && (
 REM Built-in JRE from version 1.2 is created using OpenJDK17 and is custom tailored for this application, other versions can work but are not tested.
 REM In order to have working jlink please install OpenJDK17 (or some other version that has it) and setup environment variables
 
-REM Check if we can find mvn (maven)
+REM Check if we can find jlink
 CALL jlink -h >nul 2>&1 && (
     echo Find jlink:[32m OK [0m
 ) || (
