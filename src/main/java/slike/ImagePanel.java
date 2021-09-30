@@ -233,12 +233,17 @@ public class ImagePanel extends JPanel
 						// when it fails it displays file deletion window but the file is not deleted
 						// Desktop.getDesktop().moveToTrash(file_list.get(currentFile));
 
-						sendFileToRecycleBin(currentFile);
+						if (file_list.size() > 0)
+						{
+							sendFileToRecycleBin(currentFile);
+							imageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
+							file_list.remove(currentFile); // remove from file list
+							displayNextImage();
 
-						imageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
-						file_list.remove(currentFile); // remove from file list
-
-						displayNextImage();
+						} else
+						{
+							Logger.logMessage("Failed to delete any file as file list is empty.");
+						}
 					}
 				}
 
@@ -346,7 +351,12 @@ public class ImagePanel extends JPanel
 			repaint();
 //			custompaint();
 			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
-			fileNameLabel.setText(file_list.get(currentFile).getName());
+			if (file_list.size() > 0)
+				fileNameLabel.setText(file_list.get(currentFile).getName());
+			else
+			{
+				fileNameLabel.setText("No file is loaded.");
+			}
 		}
 	}
 
@@ -443,7 +453,7 @@ public class ImagePanel extends JPanel
 		int y = 0;
 		float xscale = (float) this.getWidth() / displayImage.getWidth();
 		float yscale = (float) this.getHeight() / displayImage.getHeight();
-		if( rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
+		if (rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
 		{
 			xscale = (float) this.getWidth() / displayImage.getHeight();
 			yscale = (float) this.getHeight() / displayImage.getWidth();
@@ -457,7 +467,7 @@ public class ImagePanel extends JPanel
 			// yscale
 			// final x value in at will then have expected value
 			x = (int) ((this.getWidth() - displayImage.getWidth() * yscale) / yscale / 2);
-			if( rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
+			if (rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
 			{
 				y = (int) ((this.getHeight() - displayImage.getHeight() * yscale) / yscale / 2); // scale fix
 			}
@@ -469,14 +479,14 @@ public class ImagePanel extends JPanel
 			// need to scale image on y axis
 			at.scale(xscale, xscale);
 			y = (int) ((this.getHeight() - displayImage.getHeight() * xscale) / xscale / 2); // scale fix
-			if( rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
+			if (rotateCounter % 2 == 1 || rotateCounter % 2 == -1)
 			{
 				x = (int) ((this.getWidth() - displayImage.getWidth() * xscale) / xscale / 2);
 			}
 		}
 		at.translate(x, y);
 		at.quadrantRotate(rotateCounter, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
-		
+
 		// TODO further test code now that the rotation also plays a role
 
 		return at;

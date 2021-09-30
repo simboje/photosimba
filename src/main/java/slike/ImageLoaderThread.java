@@ -84,12 +84,16 @@ public class ImageLoaderThread extends Thread
 	{
 		if (IMAGES_MAP.size() > 10)
 		{
-			if (IMAGES_MAP.containsKey(imagePanel.file_list.get(fileAddHistoryList.get(0))))
+			if (fileAddHistoryList.get(0) < imagePanel.file_list.size())
 			{
+				if (IMAGES_MAP.containsKey(imagePanel.file_list.get(fileAddHistoryList.get(0))))
+				{
 
-				IMAGES_MAP.remove(imagePanel.file_list.get(fileAddHistoryList.get(0)));
-				fileAddHistoryList.remove(0);
+					IMAGES_MAP.remove(imagePanel.file_list.get(fileAddHistoryList.get(0)));
+				}
 			}
+			fileAddHistoryList.remove(0);
+
 		}
 	}
 
