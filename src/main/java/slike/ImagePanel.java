@@ -203,16 +203,24 @@ public class ImagePanel extends JPanel
 						}
 					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
 					{ // w or UP - rotate counter clockwise
-						coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
-						rotateCounter--;
-						repaint();
-//						custompaint();
+						if (displayImage != null)
+						{
+							coordTransform.quadrantRotate(-1, displayImage.getWidth() / 2,
+									displayImage.getHeight() / 2);
+							rotateCounter--;
+							repaint();
+//							custompaint();
+						}
+
 					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
 					{ // s or DOWN - rotate clockwise
-						coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
-						rotateCounter++;
-						repaint();
-//						custompaint();
+						if (displayImage != null)
+						{
+							coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
+							rotateCounter++;
+							repaint();
+//							custompaint();
+						}
 					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
 					{
 						// c = 67, copy file to clipboard
@@ -224,9 +232,12 @@ public class ImagePanel extends JPanel
 
 					} else if (e.getKeyCode() == 67 && e.isControlDown())
 					{
-						// c = 67, copy image to clipboard
-						ClipboardManager ci = new ClipboardManager(displayImage);
-						ci.copyImage();
+						if (displayImage != null)
+						{
+							// c = 67, copy image to clipboard
+							ClipboardManager ci = new ClipboardManager(displayImage);
+							ci.copyImage();
+						}
 					} else if (e.getKeyCode() == 127) // delete
 					{
 						// really flaky, works but not always
