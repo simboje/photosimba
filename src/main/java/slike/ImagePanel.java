@@ -85,7 +85,7 @@ public class ImagePanel extends JPanel
 						"On Windows it can happen that ŠĐŽČĆšđžčć is resolved to ŠÐŽCCšdžcc. Trying to run internal path resolver...");
 				try
 				{
-					selectedFile = fixCyrillicPath(args[0]);
+					selectedFile = Util.fixCyrillicPath(args[0]);
 					if (selectedFile.exists())
 					{
 						Logger.logMessage("Internal cyrillic path resolver was successfull! Resolved file path is: "
@@ -235,7 +235,7 @@ public class ImagePanel extends JPanel
 
 						if (file_list.size() > 0)
 						{
-							sendFileToRecycleBin(currentFile);
+							Util.sendFileToRecycleBin(file_list.get(currentFile));
 							imageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
 							file_list.remove(currentFile); // remove from file list
 							displayNextImage();
@@ -256,60 +256,8 @@ public class ImagePanel extends JPanel
 		});
 	}
 
-	private File fixCyrillicPath(String args0)
-	{
-		// https://stackoverflow.com/questions/7660651/passing-command-line-unicode-argument-to-java-code
-		// seems that my PC has a lucky locale/encoding setting
-		Path path = Paths.get(args0);
-
-		File rootFile = path.getRoot().toFile();
-		float globalMax = 0;
-
-		for (int k = 0; k < path.getNameCount(); ++k)
-		{
-			String miniPath = rootFile.getPath() + File.separator + path.getName(k);
-			File miniFile = new File(miniPath);
-			if (miniFile.exists())
-			{
-				rootFile = miniFile;
-			} else
-			{
-				Path name = path.getName(k);
-				for (File file : rootFile.listFiles())
-				{
-					if (file.getName().length() == name.getFileName().toString().length())
-					{
-						float countSameLetters = 0.1f; // as soon as the file has same length give it a little bit of
-														// similarity +0.1. For example file "Ć" will have zero same
-														// characters as our args "C", but with this bump it will be the
-														// best candidate and greater than zero which enables us to
-														// return at least some file. It may work or not if we have "Č",
-														// "Ć" files in same directory.
-						for (int i = 0; i < file.getName().length(); i++)
-						{
-							if (file.getName().charAt(i) == name.getFileName().toString().charAt(i))
-							{
-								countSameLetters++;
-							}
-						}
-
-						float localMax = countSameLetters / file.getName().length();
-						if (localMax > globalMax)
-						{
-							globalMax = localMax;
-							rootFile = file;
-						}
-					}
-				}
-			}
-		}
-
-		return rootFile;
-	}
-
 	private class WheelHandler extends MouseAdapter
 	{
-
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e)
 		{
@@ -357,26 +305,6 @@ public class ImagePanel extends JPanel
 			{
 				fileNameLabel.setText("No file is loaded.");
 			}
-		}
-	}
-
-	private void sendFileToRecycleBin(int currentFile)
-	{
-		FileUtils fileUtils = FileUtils.getInstance();
-
-		if (fileUtils.hasTrash())
-		{
-			try
-			{
-				fileUtils.moveToTrash(file_list.get(currentFile));
-				Logger.logMessage("A have trash! Deleted " + file_list.get(currentFile));
-			} catch (IOException ioe)
-			{
-				Logger.logException(ioe);
-			}
-		} else
-		{
-			Logger.logMessage("No Trash available. Failed to delete " + file_list.get(currentFile));
 		}
 	}
 
