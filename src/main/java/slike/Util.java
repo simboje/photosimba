@@ -1,7 +1,6 @@
 package slike;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -9,7 +8,9 @@ import com.sun.jna.platform.FileUtils;
 
 public class Util
 {
-	public static File fixCyrillicPath(String filePath) // as a rule args[0]
+	public static FileUtils fileUtils = FileUtils.getInstance();
+	
+	public static File findCyrillicPath(String filePath) // as a rule args[0]
 	{
 		// https://stackoverflow.com/questions/7660651/passing-command-line-unicode-argument-to-java-code
 		// seems that my PC has a lucky locale/encoding setting
@@ -60,23 +61,24 @@ public class Util
 		return rootFile;
 	}
 	
-	public static void sendFileToRecycleBin(File fileToDelete)
+	public static boolean sendFileToRecycleBin(File fileToDelete)
 	{
-		FileUtils fileUtils = FileUtils.getInstance();
-
 		if (fileUtils.hasTrash())
 		{
 			try
 			{
 				fileUtils.moveToTrash(fileToDelete);
 				Logger.logMessage("A have trash! Deleted " + fileToDelete);
-			} catch (IOException ioe)
+				return true;
+			} catch (Exception e)
 			{
-				Logger.logException(ioe);
+				Logger.logException(e);
+				return false;
 			}
 		} else
 		{
 			Logger.logMessage("No Trash available. Failed to delete " + fileToDelete);
+			return false;
 		}
 	}
 

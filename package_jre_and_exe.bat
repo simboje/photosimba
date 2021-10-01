@@ -25,6 +25,16 @@ CALL mvn clean compile assembly:single >nul 2>&1 && (
     goto :error
 )
 
+REM Run junit tests with maven
+CALL mvn test >nul 2>&1 && (
+    echo Run junit tests:[32m OK [0m
+) || (
+    echo Run junit tests:[31m ERROR [0m
+    REM Repeat command to get error message in terminal
+    mvn test
+    goto :error
+)
+
 REM Clean build directory
 CALL rmdir /Q /S build >nul 2>&1 && (
     echo Clean build/ dir:[32m OK [0m

@@ -20,9 +20,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,8 +27,6 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-
-import com.sun.jna.platform.FileUtils;
 
 @SuppressWarnings("serial")
 public class ImagePanel extends JPanel
@@ -85,7 +80,7 @@ public class ImagePanel extends JPanel
 						"On Windows it can happen that ŠĐŽČĆšđžčć is resolved to ŠÐŽCCšdžcc. Trying to run internal path resolver...");
 				try
 				{
-					selectedFile = Util.fixCyrillicPath(args[0]);
+					selectedFile = Util.findCyrillicPath(args[0]);
 					if (selectedFile.exists())
 					{
 						Logger.logMessage("Internal cyrillic path resolver was successfull! Resolved file path is: "
