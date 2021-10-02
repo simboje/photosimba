@@ -102,7 +102,9 @@ public class ImagePanel extends JPanel
 
 			if (selectedDir.exists())
 			{
-				file_list = new ArrayList<>(Arrays.asList(selectedDir.listFiles(imageFilenameFilter)));
+				File[] notSortedFiles = selectedDir.listFiles(imageFilenameFilter);
+				Arrays.sort(notSortedFiles, new WindowsExplorerStringComparator());
+				file_list = new ArrayList<>(Arrays.asList(notSortedFiles));
 				currentFile = findFileIndex(file_list, selectedFile);
 				imageLoaderThread = new ImageLoaderThread(this);
 				// start loading images
