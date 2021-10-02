@@ -60,6 +60,7 @@ public class Main
 			public void windowClosing(java.awt.event.WindowEvent windowEvent)
 			{
 				imagePanel.shutdownThread();
+				Logger.saveLogsToFile();
 			}
 		});
 	}

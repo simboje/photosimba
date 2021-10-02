@@ -495,6 +495,7 @@ public class ImagePanel extends JPanel
 	{
 		if (imageLoaderThread != null)
 			imageLoaderThread.setAlive(false);
+		
 
 	}
 

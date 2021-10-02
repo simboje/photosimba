@@ -2,6 +2,9 @@
 launch4j/*
 build/*
 
+# Log files
+slike_log#*
+
 # Eclipse files
 .settings/*
 .classpath

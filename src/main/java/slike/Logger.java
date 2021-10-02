@@ -1,5 +1,9 @@
 package slike;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Logger
@@ -29,5 +33,35 @@ public class Logger
 	public static ArrayList<Exception> getLogExceptions()
 	{
 		return logExceptions;
+	}
+
+	public static void saveLogsToFile()
+	{
+		LocalDateTime ldt = LocalDateTime.now();
+		String logFileName = "slike_log#" + ldt.getYear() + "-" + ldt.getMonthValue() + "-" + ldt.getDayOfMonth() + "_" + ldt.getHour() + 
+				"-" + ldt.getMinute() + "-" + ldt.getSecond() + ".txt";
+		File logFile = new File(logFileName);
+		try
+		{
+			FileWriter fileWriter = new FileWriter(logFile);
+			for(Exception exception:logExceptions)
+			{
+				fileWriter.append(exception.getMessage());
+				fileWriter.append("\n");
+			}
+			for(String message:logMessages)
+			{
+				fileWriter.append(message);
+				fileWriter.append("\n");
+			}
+			fileWriter.close();
+		} catch (IOException e)
+		{
+			Logger.logException(e);
+			if(SHOW_UI)
+				ErrorAndLogPanel.updateUI();
+		}
+		
+		
 	}
 }
