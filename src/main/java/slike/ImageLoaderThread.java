@@ -25,9 +25,7 @@ import com.drew.metadata.Tag;
 
 public class ImageLoaderThread extends Thread
 {
-
-	int currentFile = -1;
-
+	private static int threadCounter = 0;
 	private static Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
 	private static ArrayList<Integer> fileAddHistoryList = new ArrayList<>();
 
@@ -37,35 +35,21 @@ public class ImageLoaderThread extends Thread
 
 	static Object lockObject = new Object();
 
-	public ImageLoaderThread(int currentFile)
-	{
-		this.currentFile = currentFile;
-	}
-
 	@Override
 	public void run()
 	{
-		if (ImagePanel.currentFile != currentFile)
+		try
 		{
-			loadImageFile(ImagePanel.currentFile);
-			this.currentFile = ImagePanel.currentFile;
-		} else
+			loadImageFile(ImagePanel.currentFile - 1);
+			loadImageFile(ImagePanel.currentFile + 1);
+			loadImageFile(ImagePanel.currentFile - 2);
+			loadImageFile(ImagePanel.currentFile + 2);
+		} catch (Exception e)
 		{
-			try
-			{
-				loadImageFile(currentFile - 1);
-				loadImageFile(currentFile + 1);
-				loadImageFile(currentFile - 2);
-				loadImageFile(currentFile + 2);
-
-				Thread.sleep(5);
-			} catch (Exception e)
-			{
-				Logger.logException(e);
-			}
+			Logger.logException(e);
 		}
-
-		Logger.logMessage("Shutting down thread...");
+		threadCounter++;
+		Logger.logMessage("Shutting down thread id#"+threadCounter);
 	}
 
 	private static void clearImageMap() throws Exception
@@ -85,20 +69,10 @@ public class ImageLoaderThread extends Thread
 		}
 	}
 
-	public ImageData getBufferedImage(int fileIndex)
-	{
-		this.currentFile = fileIndex;
-
-		if (!IMAGES_MAP.containsKey(ImagePanel.file_list.get(currentFile)))
-			loadImageFile(fileIndex);
-
-		return IMAGES_MAP.get(ImagePanel.file_list.get(currentFile));
-	}
-
 	public static ImageData loadImageFile(int index)
 	{
 		ImageData imageData = null;
-		synchronized (lockObject)	// stop duplicate loading and wasting time
+		synchronized (lockObject) // stop duplicate loading and wasting time
 		{
 			if (index >= 0 && index < ImagePanel.file_list.size())
 			{

@@ -289,7 +289,7 @@ public class ImagePanel extends JPanel
 		custompaint();
 		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
 		fileNameLabel.setText(file_list.get(currentFile).getName());
-		imageLoaderThread = new ImageLoaderThread(currentFile);
+		imageLoaderThread = new ImageLoaderThread();
 		imageLoaderThread.start();
 	}
 
@@ -333,14 +333,6 @@ public class ImagePanel extends JPanel
 				return i;
 		}
 		return 0;
-	}
-
-	private BufferedImage getDisplayImage(int currentFile)
-	{
-		init = true;
-		ImageData imageData = imageLoaderThread.getBufferedImage(currentFile);
-		this.rotateCounter = imageData.getRotation();
-		return imageData.getImage();
 	}
 
 	@Override
