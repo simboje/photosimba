@@ -271,6 +271,7 @@ public class ImagePanel extends JPanel
 	public void changeImage()
 	{
 		displayImage = ImageLoaderThread.loadImageFile(currentFile).getImage();
+		init = true;
 		custompaint();
 		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
 		fileNameLabel.setText(file_list.get(currentFile).getName());
@@ -327,11 +328,6 @@ public class ImagePanel extends JPanel
 				fileNameLabel.setText("No file is loaded.");
 			}
 		}
-	}
-
-	public List<File> getFile_list()
-	{
-		return file_list;
 	}
 
 	public void setRotateCounter(int rotateCounter)
@@ -454,7 +450,6 @@ public class ImagePanel extends JPanel
 			dragStartScreen = dragEndScreen;
 			dragEndScreen = null;
 			repaint();
-//			custompaint();
 		} catch (NoninvertibleTransformException ex)
 		{
 			Logger.logException(ex);
@@ -477,7 +472,6 @@ public class ImagePanel extends JPanel
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
-//					custompaint();
 				}
 			} else
 			{
@@ -489,7 +483,6 @@ public class ImagePanel extends JPanel
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
-//					custompaint();
 				}
 			}
 		} catch (NoninvertibleTransformException ex)
@@ -510,41 +503,20 @@ public class ImagePanel extends JPanel
 	{
 		if (localFiles.length > 0)
 		{
-			this.file_list = new ArrayList<>(Arrays.asList(localFiles));
-
-			if (imageLoaderThread != null)
-			{
-				// shutdown thread for new directory
-				currentFile = 0;
-			}
-
-			imageLoaderThread = new ImageLoaderThread(currentFile);
-			// start loading images
-//			imageLoaderThread.start();
-
+			file_list = new ArrayList<>(Arrays.asList(localFiles));
 			if (file_list != null)
 			{
-				displayImageAndMeasureTime();
+				changeImage();
 			}
-
-			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-			fileNameLabel.setText(file_list.get(currentFile).getName());
 		} else
 		{
 			fileIndexLabel.setText("Selected directory has no image files!");
 		}
 	}
 
-	// called from background thread
-	public void notifyAboutNewImage()
-	{
-		displayImageAndMeasureTime();
-	}
-
 	private void displayImageAndMeasureTime()
 	{
 		displayImage = getDisplayImage(currentFile); // show first image
 		repaint();
-//		custompaint();
 	}
 }

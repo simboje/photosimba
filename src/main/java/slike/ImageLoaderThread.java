@@ -47,7 +47,6 @@ public class ImageLoaderThread extends Thread
 		{
 			loadImageFile(ImagePanel.currentFile);
 			this.currentFile = ImagePanel.currentFile;
-			// ImagePanel.notifyAboutNewImage();
 		} else
 		{
 			try
