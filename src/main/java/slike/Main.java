@@ -53,5 +53,14 @@ public class Main
 		frame.setIconImage(icon.getImage());
 		frame.setMinimumSize(new Dimension(800, 600));
 		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		
+		frame.addWindowListener(new java.awt.event.WindowAdapter()
+		{
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent windowEvent)
+			{
+				Logger.saveLogsToFile();
+			}
+		});
 	}
 }
