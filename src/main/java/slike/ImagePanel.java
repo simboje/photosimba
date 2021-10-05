@@ -250,7 +250,21 @@ public class ImagePanel extends JPanel
 							Util.sendFileToRecycleBin(file_list.get(currentFile));
 							imageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
 							file_list.remove(currentFile); // remove from file list
-							displayNextImage();
+							if (!(currentFile < file_list.size()))
+							{
+								currentFile--;
+							}
+							if (currentFile == -1) // no more files left
+							{
+								displayImage = null;
+								repaint();
+								fileIndexLabel.setText("File 0/0");
+								fileNameLabel.setText("No more files left");
+								currentFile = 0;
+							} else
+							{
+								changeImage();
+							}
 
 						} else
 						{
@@ -303,30 +317,6 @@ public class ImagePanel extends JPanel
 		{
 			zoomStopped = true;
 			repaint();
-		}
-	}
-
-	protected void displayNextImage()
-	{
-		if (file_list.size() > 0)
-		{
-			if (!(currentFile < file_list.size()))
-				currentFile--;
-			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-			fileNameLabel.setText(file_list.get(currentFile).getName());
-			displayImageAndMeasureTime();
-		} else
-		{
-			displayImage = null;
-			repaint();
-//			custompaint();
-			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
-			if (file_list.size() > 0)
-				fileNameLabel.setText(file_list.get(currentFile).getName());
-			else
-			{
-				fileNameLabel.setText("No file is loaded.");
-			}
 		}
 	}
 
@@ -512,11 +502,5 @@ public class ImagePanel extends JPanel
 		{
 			fileIndexLabel.setText("Selected directory has no image files!");
 		}
-	}
-
-	private void displayImageAndMeasureTime()
-	{
-		displayImage = getDisplayImage(currentFile); // show first image
-		repaint();
 	}
 }
