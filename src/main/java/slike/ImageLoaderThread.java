@@ -144,44 +144,6 @@ public class ImageLoaderThread extends Thread
 		return imageData;
 	}
 
-	public static ImageData loadImageFileNEW(int index)
-	{
-		ImageData imageData = null;
-		try
-		{
-			int rotation = 0;
-			long mili1 = System.currentTimeMillis();
-
-			try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
-			{
-				imageData = new ImageData(ImageIO.read(stream));
-				IMAGES_MAP.put(ImagePanel.file_list.get(index), imageData);
-				fileAddHistoryList.add(index);
-
-			}
-			try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
-			{
-				rotation = readImageInformation(stream);
-				imageData.setRotation(rotation);
-			}
-
-			BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
-					imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
-			Graphics g = buffy.getGraphics();
-			g.drawImage(imageData.getImage(), 0, 0, null);
-			imageData.setImage(buffy);
-			clearImageMap();
-			long mili2 = System.currentTimeMillis();
-			Logger.logMessage(ImagePanel.file_list.get(index).getName() + " load time ms " + (mili2 - mili1) + " , EXIF rotation: "
-					+ rotation);
-
-		} catch (Exception e)
-		{
-			Logger.logException(e);
-		}
-		return imageData;
-	}
-
 	public static int readImageInformation(InputStream imageFileStream)
 			throws IOException, MetadataException, ImageProcessingException
 	{
