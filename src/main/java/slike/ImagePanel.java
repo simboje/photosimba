@@ -50,7 +50,6 @@ public class ImagePanel extends JPanel
 	private int maxZoomLevel = 20;
 	private double zoomMultiplicationFactor = 1.2;
 
-	ImageLoaderThread imageLoaderThread;
 	private int rotateCounter = 0;
 
 	JLabel fileIndexLabel;
@@ -106,9 +105,6 @@ public class ImagePanel extends JPanel
 				Arrays.sort(notSortedFiles, new WindowsExplorerStringComparator());
 				file_list = new ArrayList<>(Arrays.asList(notSortedFiles));
 				currentFile = findFileIndex(file_list, selectedFile);
-//				imageLoaderThread = new ImageLoaderThread(file_list);
-				// start loading images
-//				imageLoaderThread.start();
 
 				if (file_list != null)
 				{
@@ -128,9 +124,8 @@ public class ImagePanel extends JPanel
 			@Override
 			public void componentResized(ComponentEvent e)
 			{
-				init = true;
+				init = true;	// fit to new frame size
 				repaint();
-//				custompaint();
 			}
 		});
 
@@ -177,7 +172,7 @@ public class ImagePanel extends JPanel
 
 			@Override
 			public void keyReleased(KeyEvent e)
-			{ // XCODE when released load new file
+			{ // when released load new file
 				if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
 				{ // go left
 					changeImage();
@@ -197,16 +192,16 @@ public class ImagePanel extends JPanel
 						if (currentFile > 0)
 						{
 							currentFile--;
-							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-							fileNameLabel.setText(file_list.get(currentFile).getName());
+							if(ImageLoaderThread.IMAGES_MAP.containsKey(file_list.get(currentFile)))
+								changeImage();
 						}
 					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
 					{ // go right
 						if (currentFile < file_list.size() - 1)
 						{
 							currentFile++;
-							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-							fileNameLabel.setText(file_list.get(currentFile).getName());
+							if(ImageLoaderThread.IMAGES_MAP.containsKey(file_list.get(currentFile)))
+								changeImage();
 						}
 					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
 					{ // w or UP - rotate counter clockwise
@@ -248,7 +243,7 @@ public class ImagePanel extends JPanel
 						if (file_list.size() > 0)
 						{
 							Util.sendFileToRecycleBin(file_list.get(currentFile));
-							imageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
+							ImageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
 							file_list.remove(currentFile); // remove from file list
 							if (!(currentFile < file_list.size()))
 							{
@@ -289,7 +284,7 @@ public class ImagePanel extends JPanel
 		custompaint();
 		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
 		fileNameLabel.setText(file_list.get(currentFile).getName());
-		imageLoaderThread = new ImageLoaderThread();
+		ImageLoaderThread imageLoaderThread = new ImageLoaderThread();
 		imageLoaderThread.start();
 	}
 

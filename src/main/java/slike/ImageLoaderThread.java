@@ -26,7 +26,7 @@ import com.drew.metadata.Tag;
 public class ImageLoaderThread extends Thread
 {
 	private static int threadCounter = 0;
-	private static Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
+	public static Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
 	private static ArrayList<Integer> fileAddHistoryList = new ArrayList<>();
 
 	static GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -49,7 +49,7 @@ public class ImageLoaderThread extends Thread
 			Logger.logException(e);
 		}
 		threadCounter++;
-		Logger.logMessage("Shutting down thread id#"+threadCounter);
+		Logger.logMessage("Shutting down thread id#" + threadCounter);
 	}
 
 	private static void clearImageMap() throws Exception
@@ -72,9 +72,10 @@ public class ImageLoaderThread extends Thread
 	public static ImageData loadImageFile(int index)
 	{
 		ImageData imageData = null;
-		synchronized (lockObject) // stop duplicate loading and wasting time
+
+		if (index >= 0 && index < ImagePanel.file_list.size())
 		{
-			if (index >= 0 && index < ImagePanel.file_list.size())
+			synchronized (lockObject) // stop duplicate loading and wasting time
 			{
 				if (!IMAGES_MAP.containsKey(ImagePanel.file_list.get(index)))
 				{
@@ -157,7 +158,7 @@ public class ImageLoaderThread extends Thread
 		return orientation;
 	}
 
-	public void removeImage(File file)
+	public static void removeImage(File file)
 	{
 		// part of file delete procedure
 		IMAGES_MAP.remove(file);
