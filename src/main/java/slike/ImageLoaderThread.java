@@ -35,6 +35,8 @@ public class ImageLoaderThread extends Thread
 	static GraphicsDevice device = env.getDefaultScreenDevice();
 	static GraphicsConfiguration config = device.getDefaultConfiguration();
 
+	static Object lockObject = new Object();
+
 	public ImageLoaderThread(int currentFile)
 	{
 		this.currentFile = currentFile;
@@ -96,50 +98,53 @@ public class ImageLoaderThread extends Thread
 	public static ImageData loadImageFile(int index)
 	{
 		ImageData imageData = null;
-		if (index >= 0 && index < ImagePanel.file_list.size())
+		synchronized (lockObject)	// stop duplicate loading and wasting time
 		{
-			if (!IMAGES_MAP.containsKey(ImagePanel.file_list.get(index)))
+			if (index >= 0 && index < ImagePanel.file_list.size())
 			{
-				try
+				if (!IMAGES_MAP.containsKey(ImagePanel.file_list.get(index)))
 				{
-					int rotation = 0;
-					long mili1 = System.currentTimeMillis();
-					
-					try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
+					try
 					{
+						int rotation = 0;
+						long mili1 = System.currentTimeMillis();
 
-						imageData = new ImageData(ImageIO.read(stream));
-						IMAGES_MAP.put(ImagePanel.file_list.get(index), imageData);
-						fileAddHistoryList.add(index);
+						try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
+						{
 
-					}
-					try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
+							imageData = new ImageData(ImageIO.read(stream));
+							IMAGES_MAP.put(ImagePanel.file_list.get(index), imageData);
+							fileAddHistoryList.add(index);
+
+						}
+						try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
+						{
+							rotation = readImageInformation(stream);
+							imageData.setRotation(rotation);
+						}
+
+						BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
+								imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
+						Graphics g = buffy.getGraphics();
+						g.drawImage(imageData.getImage(), 0, 0, null);
+						imageData.setImage(buffy);
+						clearImageMap();
+						long mili2 = System.currentTimeMillis();
+						Logger.logMessage(ImagePanel.file_list.get(index).getName() + " load time ms " + (mili2 - mili1)
+								+ " , EXIF rotation: " + rotation);
+
+					} catch (Exception e)
 					{
-						rotation = readImageInformation(stream);
-						imageData.setRotation(rotation);
+						e.printStackTrace();
+						Logger.logException(e);
 					}
-
-					BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
-							imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
-					Graphics g = buffy.getGraphics();
-					g.drawImage(imageData.getImage(), 0, 0, null);
-					imageData.setImage(buffy);
-					clearImageMap();
-					long mili2 = System.currentTimeMillis();
-					Logger.logMessage(ImagePanel.file_list.get(index).getName() + " load time ms " + (mili2 - mili1)
-							+ " , EXIF rotation: " + rotation);
-
-				} catch (Exception e)
+				} else
 				{
-					e.printStackTrace();
-					Logger.logException(e);
+					return IMAGES_MAP.get(ImagePanel.file_list.get(index));
 				}
 			}
-			else {
-				return IMAGES_MAP.get(ImagePanel.file_list.get(index));
-			}
 		}
-		
+
 		return imageData;
 	}
 
