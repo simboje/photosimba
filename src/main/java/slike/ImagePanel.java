@@ -106,16 +106,13 @@ public class ImagePanel extends JPanel
 				Arrays.sort(notSortedFiles, new WindowsExplorerStringComparator());
 				file_list = new ArrayList<>(Arrays.asList(notSortedFiles));
 				currentFile = findFileIndex(file_list, selectedFile);
-				imageLoaderThread = new ImageLoaderThread(file_list);
+//				imageLoaderThread = new ImageLoaderThread(file_list);
 				// start loading images
 //				imageLoaderThread.start();
 
 				if (file_list != null)
 				{
-//					displayImageAndMeasureTime();
-					displayImage = ImageLoaderThread.loadImageFileNEW(currentFile).getImage();
-					fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-					fileNameLabel.setText(file_list.get(currentFile).getName());
+					changeImage();
 				}
 			} else
 			{
@@ -180,13 +177,13 @@ public class ImagePanel extends JPanel
 
 			@Override
 			public void keyReleased(KeyEvent e)
-			{	// XCODE when released load new file
+			{ // XCODE when released load new file
 				if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
 				{ // go left
-					System.out.println("Released left");
+					changeImage();
 				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
 				{ // go right
-					System.out.println("Released right");
+					changeImage();
 				}
 			}
 
@@ -194,7 +191,7 @@ public class ImagePanel extends JPanel
 			public void keyPressed(KeyEvent e)
 			{
 				if (file_list != null)
-				{	// XCODE when pressed just change index
+				{ // XCODE when pressed just change index
 					if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
 					{ // go left
 						if (currentFile > 0)
@@ -219,7 +216,6 @@ public class ImagePanel extends JPanel
 									displayImage.getHeight() / 2);
 							rotateCounter--;
 							repaint();
-//							custompaint();
 						}
 
 					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
@@ -229,7 +225,6 @@ public class ImagePanel extends JPanel
 							coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 							rotateCounter++;
 							repaint();
-//							custompaint();
 						}
 					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
 					{
@@ -250,10 +245,6 @@ public class ImagePanel extends JPanel
 						}
 					} else if (e.getKeyCode() == 127) // delete
 					{
-						// really flaky, works but not always
-						// when it fails it displays file deletion window but the file is not deleted
-						// Desktop.getDesktop().moveToTrash(file_list.get(currentFile));
-
 						if (file_list.size() > 0)
 						{
 							Util.sendFileToRecycleBin(file_list.get(currentFile));
@@ -275,6 +266,16 @@ public class ImagePanel extends JPanel
 			}
 
 		});
+	}
+
+	public void changeImage()
+	{
+		displayImage = ImageLoaderThread.loadImageFile(currentFile).getImage();
+		custompaint();
+		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+		fileNameLabel.setText(file_list.get(currentFile).getName());
+		imageLoaderThread = new ImageLoaderThread(currentFile);
+		imageLoaderThread.start();
 	}
 
 	private class WheelHandler extends MouseAdapter
@@ -315,7 +316,6 @@ public class ImagePanel extends JPanel
 			displayImageAndMeasureTime();
 		} else
 		{
-			imageLoaderThread.setAlive(false);
 			displayImage = null;
 			repaint();
 //			custompaint();
@@ -506,14 +506,6 @@ public class ImagePanel extends JPanel
 		return p2;
 	}
 
-	public void shutdownThread()
-	{
-		if (imageLoaderThread != null)
-			imageLoaderThread.setAlive(false);
-		
-
-	}
-
 	public void loadFiles(File[] localFiles)
 	{
 		if (localFiles.length > 0)
@@ -523,11 +515,10 @@ public class ImagePanel extends JPanel
 			if (imageLoaderThread != null)
 			{
 				// shutdown thread for new directory
-				imageLoaderThread.setAlive(false);
 				currentFile = 0;
 			}
 
-			imageLoaderThread = new ImageLoaderThread(file_list);
+			imageLoaderThread = new ImageLoaderThread(currentFile);
 			// start loading images
 //			imageLoaderThread.start();
 
