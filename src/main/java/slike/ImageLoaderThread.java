@@ -27,21 +27,20 @@ public class ImageLoaderThread extends Thread
 {
 
 	int currentFile = -1;
-	ImagePanel imagePanel;
+	static ArrayList<File> file_list;
 
-	private Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
-	private ArrayList<Integer> fileAddHistoryList = new ArrayList<>();
+	private static Map<File, ImageData> IMAGES_MAP = new HashMap<File, ImageData>();
+	private static ArrayList<Integer> fileAddHistoryList = new ArrayList<>();
 
 	private boolean alive;
 
 	GraphicsEnvironment env;
 	GraphicsDevice device;
-	GraphicsConfiguration config;
+	static GraphicsConfiguration config;
 
-	public ImageLoaderThread(ImagePanel imagePanel)
+	public ImageLoaderThread(ArrayList<File> file_list)
 	{
-		this.imagePanel = imagePanel;
-
+		this.file_list = file_list;
 		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		device = env.getDefaultScreenDevice();
 		config = device.getDefaultConfiguration();
@@ -55,11 +54,11 @@ public class ImageLoaderThread extends Thread
 
 		while (alive)
 		{
-			if (imagePanel.currentFile != currentFile)
+			if (ImagePanel.currentFile != currentFile)
 			{
-				loadImageFile(imagePanel.currentFile);
-				this.currentFile = imagePanel.currentFile;
-				imagePanel.notifyAboutNewImage();
+				loadImageFile(ImagePanel.currentFile);
+				this.currentFile = ImagePanel.currentFile;
+				//ImagePanel.notifyAboutNewImage();
 			} else
 			{
 				try
@@ -80,16 +79,16 @@ public class ImageLoaderThread extends Thread
 		Logger.logMessage("Shutting down thread...");
 	}
 
-	private void clearImageMap() throws Exception
+	private static void clearImageMap() throws Exception
 	{
 		if (IMAGES_MAP.size() > 10)
 		{
-			if (fileAddHistoryList.get(0) < imagePanel.file_list.size())
+			if (fileAddHistoryList.get(0) < ImagePanel.file_list.size())
 			{
-				if (IMAGES_MAP.containsKey(imagePanel.file_list.get(fileAddHistoryList.get(0))))
+				if (IMAGES_MAP.containsKey(ImagePanel.file_list.get(fileAddHistoryList.get(0))))
 				{
 
-					IMAGES_MAP.remove(imagePanel.file_list.get(fileAddHistoryList.get(0)));
+					IMAGES_MAP.remove(ImagePanel.file_list.get(fileAddHistoryList.get(0)));
 				}
 			}
 			fileAddHistoryList.remove(0);
@@ -101,33 +100,33 @@ public class ImageLoaderThread extends Thread
 	{
 		this.currentFile = fileIndex;
 
-		if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list().get(currentFile)))
+		if (!this.IMAGES_MAP.containsKey(this.file_list.get(currentFile)))
 			loadImageFile(fileIndex);
 
-		return this.IMAGES_MAP.get(imagePanel.getFile_list().get(currentFile));
+		return this.IMAGES_MAP.get(this.file_list.get(currentFile));
 	}
 
-	private void loadImageFile(int index)
+	public static void loadImageFile(int index)
 	{
 
-		if (index >= 0 && index < imagePanel.getFile_list().size())
+		if (index >= 0 && index < file_list.size())
 		{
-			if (!this.IMAGES_MAP.containsKey(imagePanel.getFile_list().get(index)))
+			if (!IMAGES_MAP.containsKey(file_list.get(index)))
 			{
 				try
 				{
 					int rotation = 0;
 					long mili1 = System.currentTimeMillis();
 					ImageData imageData;
-					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
+					try (FileInputStream stream = new FileInputStream(file_list.get(index)))
 					{
 
 						imageData = new ImageData(ImageIO.read(stream));
-						this.IMAGES_MAP.put(imagePanel.getFile_list().get(index), imageData);
+						IMAGES_MAP.put(file_list.get(index), imageData);
 						fileAddHistoryList.add(index);
 
 					}
-					try (FileInputStream stream = new FileInputStream(imagePanel.getFile_list().get(index)))
+					try (FileInputStream stream = new FileInputStream(file_list.get(index)))
 					{
 						rotation = readImageInformation(stream);
 						imageData.setRotation(rotation);
@@ -136,11 +135,11 @@ public class ImageLoaderThread extends Thread
 					BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
 							imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
 					Graphics g = buffy.getGraphics();
-					g.drawImage(imageData.getImage(), 0, 0, imagePanel);
+					g.drawImage(imageData.getImage(), 0, 0, null);
 					imageData.setImage(buffy);
 					clearImageMap();
 					long mili2 = System.currentTimeMillis();
-					Logger.logMessage(imagePanel.getFile_list().get(index).getName() + " load time ms "
+					Logger.logMessage(file_list.get(index).getName() + " load time ms "
 							+ (mili2 - mili1) + " , EXIF rotation: " + rotation);
 
 				} catch (Exception e)
@@ -150,13 +149,51 @@ public class ImageLoaderThread extends Thread
 			}
 		}
 	}
+	
+	public static ImageData loadImageFileNEW(int index)
+	{
+		ImageData imageData = null;
+		try
+		{
+			int rotation = 0;
+			long mili1 = System.currentTimeMillis();
+			
+			try (FileInputStream stream = new FileInputStream(file_list.get(index)))
+			{
+				imageData = new ImageData(ImageIO.read(stream));
+				IMAGES_MAP.put(file_list.get(index), imageData);
+				fileAddHistoryList.add(index);
+
+			}
+			try (FileInputStream stream = new FileInputStream(file_list.get(index)))
+			{
+				rotation = readImageInformation(stream);
+				imageData.setRotation(rotation);
+			}
+
+			BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
+					imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
+			Graphics g = buffy.getGraphics();
+			g.drawImage(imageData.getImage(), 0, 0, null);
+			imageData.setImage(buffy);
+			clearImageMap();
+			long mili2 = System.currentTimeMillis();
+			Logger.logMessage(file_list.get(index).getName() + " load time ms "
+					+ (mili2 - mili1) + " , EXIF rotation: " + rotation);
+
+		} catch (Exception e)
+		{
+			Logger.logException(e);
+		}
+		return imageData;
+	}
 
 	public void setAlive(boolean alive)
 	{
 		this.alive = alive;
 	}
 
-	public int readImageInformation(InputStream imageFileStream)
+	public static int readImageInformation(InputStream imageFileStream)
 			throws IOException, MetadataException, ImageProcessingException
 	{
 		Metadata metadata = ImageMetadataReader.readMetadata(imageFileStream);

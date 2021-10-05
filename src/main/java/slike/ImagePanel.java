@@ -33,14 +33,14 @@ public class ImagePanel extends JPanel
 {
 
 	File selectedDir;
-	ArrayList<File> file_list;
+	static ArrayList<File> file_list;
 
 	BufferedImage displayImage;
 
 	private boolean init = true;
 	private AffineTransform coordTransform = new AffineTransform();
 
-	public int currentFile = 0;
+	public static int currentFile = 0;
 
 	private Point dragStartScreen;
 	private Point dragEndScreen;
@@ -106,13 +106,14 @@ public class ImagePanel extends JPanel
 				Arrays.sort(notSortedFiles, new WindowsExplorerStringComparator());
 				file_list = new ArrayList<>(Arrays.asList(notSortedFiles));
 				currentFile = findFileIndex(file_list, selectedFile);
-				imageLoaderThread = new ImageLoaderThread(this);
+				imageLoaderThread = new ImageLoaderThread(file_list);
 				// start loading images
-				imageLoaderThread.start();
+//				imageLoaderThread.start();
 
 				if (file_list != null)
 				{
-					displayImageAndMeasureTime();
+//					displayImageAndMeasureTime();
+					displayImage = ImageLoaderThread.loadImageFileNEW(currentFile).getImage();
 					fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
 					fileNameLabel.setText(file_list.get(currentFile).getName());
 				}
@@ -178,10 +179,22 @@ public class ImagePanel extends JPanel
 		{
 
 			@Override
+			public void keyReleased(KeyEvent e)
+			{	// XCODE when released load new file
+				if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
+				{ // go left
+					System.out.println("Released left");
+				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
+				{ // go right
+					System.out.println("Released right");
+				}
+			}
+
+			@Override
 			public void keyPressed(KeyEvent e)
 			{
 				if (file_list != null)
-				{
+				{	// XCODE when pressed just change index
 					if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
 					{ // go left
 						if (currentFile > 0)
@@ -514,9 +527,9 @@ public class ImagePanel extends JPanel
 				currentFile = 0;
 			}
 
-			imageLoaderThread = new ImageLoaderThread(this);
+			imageLoaderThread = new ImageLoaderThread(file_list);
 			// start loading images
-			imageLoaderThread.start();
+//			imageLoaderThread.start();
 
 			if (file_list != null)
 			{
