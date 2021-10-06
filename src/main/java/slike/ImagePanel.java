@@ -258,7 +258,6 @@ public class ImagePanel extends JPanel
 							{
 								changeImage();
 							}
-
 						} else
 						{
 							Logger.logMessage("Failed to delete any file as file list is empty.");
@@ -280,6 +279,7 @@ public class ImagePanel extends JPanel
 		{
 			init = true;
 			displayImage = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getImage();
+			rotateCounter = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getRotation();
 		}
 		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
 		fileNameLabel.setText(file_list.get(currentFile).getName());
@@ -291,6 +291,7 @@ public class ImagePanel extends JPanel
 		init = true;
 		updateUI(currentFile);
 		displayImage = ImageLoaderThread.loadImageFile(currentFile).getImage();
+		rotateCounter = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getRotation();
 		ImageLoaderThread imageLoaderThread = new ImageLoaderThread();
 		imageLoaderThread.start();
 	}
@@ -320,11 +321,6 @@ public class ImagePanel extends JPanel
 			zoomStopped = true;
 			repaint();
 		}
-	}
-
-	public void setRotateCounter(int rotateCounter)
-	{
-		this.rotateCounter = rotateCounter;
 	}
 
 	private int findFileIndex(ArrayList<File> flist, File selectedFile)
@@ -365,7 +361,6 @@ public class ImagePanel extends JPanel
 			}
 
 			g2.drawImage(displayImage, 0, 0, this);
-
 			g2.dispose();
 		}
 	}
