@@ -124,7 +124,7 @@ public class ImagePanel extends JPanel
 			@Override
 			public void componentResized(ComponentEvent e)
 			{
-				init = true;	// fit to new frame size
+				init = true; // fit to new frame size
 				repaint();
 			}
 		});
@@ -192,16 +192,14 @@ public class ImagePanel extends JPanel
 						if (currentFile > 0)
 						{
 							currentFile--;
-							if(ImageLoaderThread.IMAGES_MAP.containsKey(file_list.get(currentFile)))
-								changeImage();
+							updateUI(currentFile);
 						}
 					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
 					{ // go right
 						if (currentFile < file_list.size() - 1)
 						{
 							currentFile++;
-							if(ImageLoaderThread.IMAGES_MAP.containsKey(file_list.get(currentFile)))
-								changeImage();
+							updateUI(currentFile);
 						}
 					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
 					{ // w or UP - rotate counter clockwise
@@ -273,17 +271,26 @@ public class ImagePanel extends JPanel
 					ErrorAndLogPanel.updateUI();
 				}
 			}
-
 		});
+	}
+
+	private void updateUI(int currentFile)
+	{
+		if (ImageLoaderThread.IMAGES_MAP.containsKey(file_list.get(currentFile)))
+		{
+			init = true;
+			displayImage = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getImage();
+		}
+		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+		fileNameLabel.setText(file_list.get(currentFile).getName());
+		repaint();
 	}
 
 	public void changeImage()
 	{
-		displayImage = ImageLoaderThread.loadImageFile(currentFile).getImage();
 		init = true;
-		custompaint();
-		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-		fileNameLabel.setText(file_list.get(currentFile).getName());
+		updateUI(currentFile);
+		displayImage = ImageLoaderThread.loadImageFile(currentFile).getImage();
 		ImageLoaderThread imageLoaderThread = new ImageLoaderThread();
 		imageLoaderThread.start();
 	}

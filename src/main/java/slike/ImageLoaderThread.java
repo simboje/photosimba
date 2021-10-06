@@ -60,12 +60,10 @@ public class ImageLoaderThread extends Thread
 			{
 				if (IMAGES_MAP.containsKey(ImagePanel.file_list.get(fileAddHistoryList.get(0))))
 				{
-
 					IMAGES_MAP.remove(ImagePanel.file_list.get(fileAddHistoryList.get(0)));
 				}
 			}
 			fileAddHistoryList.remove(0);
-
 		}
 	}
 
