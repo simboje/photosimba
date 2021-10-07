@@ -62,10 +62,12 @@ public class ErrorAndLogPanel
 
 		for (Exception exception : Logger.getLogExceptions())
 		{
+			textArea.append(exception.getMessage()+"\n");
 			for (StackTraceElement element : exception.getStackTrace())
 			{
 				textArea.append(element.toString() + "\n");
 			}
+			textArea.append("-----\n");
 		}
 
 		for (String message : Logger.getLogMessages())

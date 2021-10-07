@@ -46,8 +46,12 @@ public class Logger
 			FileWriter fileWriter = new FileWriter(logFile);
 			for(Exception exception:logExceptions)
 			{
-				fileWriter.append(exception.getMessage());
-				fileWriter.append("\n");
+				fileWriter.append(exception.getMessage()+"\n");
+				for (StackTraceElement element : exception.getStackTrace())
+				{
+					fileWriter.append(element.toString() + "\n");
+				}
+				fileWriter.append("-----\n");
 			}
 			for(String message:logMessages)
 			{
