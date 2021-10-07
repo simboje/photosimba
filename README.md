@@ -13,7 +13,7 @@ It is made for Windows users and .exe file is packed for convenience, but .jar i
 Versions with bundled JRE (better)<br/>
 [Latest development build](https://1drv.ms/u/s!AhATAQSs_IENgplfeanE34012tkb9w?e=7sUxvn)<br>
 
-[Version 1.3](https://1drv.ms/u/s!AhATAQSs_IENgpoEqI8ynZA5LF9vmQ?e=L3yVRA)
+[Version 1.3](https://1drv.ms/u/s!AhATAQSs_IENgpoEqI8ynZA5LF9vmQ?e=L3yVRA)<br>
 [Version 1.2](https://1drv.ms/u/s!AhATAQSs_IENgpleIHFsemLA3WTRBQ?e=Vm0zy3)
 
 Old versions using system JRE (here for reference, but have much higher memory usage)<br/>
@@ -58,6 +58,6 @@ Program will run even if build/jre-17 is removed and will use system JRE but thi
 ## Credits
 Library for reading metadata about image orientation [metadata-extractor](https://github.com/drewnoakes/metadata-extractor).<br/>
 Java Native Access (JNA) used for sending files to recycle bin [JNA GitHub page](https://github.com/java-native-access/jna)<br/>
-Profiling tool [VisualVM](https://visualvm.github.io/index.html)
+Profiling tool [VisualVM](https://visualvm.github.io/index.html)<br>
 Image drag and zoom code taken from [this example](https://stackoverflow.com/questions/58021358/java-how-to-do-image-manipulation-pan-zoom-flip-and-rotate).<br/>
 Copy image to clipboard [example](https://stackoverflow.com/questions/4552045/copy-bufferedimage-to-clipboard) , copy file to clipboard [example](https://stackoverflow.com/questions/31798646/can-java-system-clipboard-copy-a-file)<br/>
