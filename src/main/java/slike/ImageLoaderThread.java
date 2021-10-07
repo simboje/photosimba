@@ -8,6 +8,7 @@ import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -79,32 +80,15 @@ public class ImageLoaderThread extends Thread
 				{
 					try
 					{
-						int rotation = 0;
 						long mili1 = System.currentTimeMillis();
-
-						try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
-						{
-
-							imageData = new ImageData(ImageIO.read(stream));
-							IMAGES_MAP.put(ImagePanel.file_list.get(index), imageData);
-							fileAddHistoryList.add(index);
-
-						}
-						try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
-						{
-							rotation = readImageInformation(stream);
-							imageData.setRotation(rotation);
-						}
-
-						BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
-								imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
-						Graphics g = buffy.getGraphics();
-						g.drawImage(imageData.getImage(), 0, 0, null);
-						imageData.setImage(buffy);
+						imageData = readImageData(index);
+						readImageExifData(imageData, index);
+						createCompatibleImage(imageData);
 						clearImageMap();
 						long mili2 = System.currentTimeMillis();
+
 						Logger.logMessage(ImagePanel.file_list.get(index).getName() + " load time ms " + (mili2 - mili1)
-								+ " , EXIF rotation: " + rotation);
+								+ " , EXIF rotation: " + imageData.getRotation());
 
 					} catch (Exception e)
 					{
@@ -118,6 +102,37 @@ public class ImageLoaderThread extends Thread
 			}
 		}
 
+		return imageData;
+	}
+
+	private static void createCompatibleImage(ImageData imageData)
+	{
+		BufferedImage buffy = config.createCompatibleImage(imageData.getImage().getWidth(),
+				imageData.getImage().getHeight(), Transparency.TRANSLUCENT);
+		Graphics g = buffy.getGraphics();
+		g.drawImage(imageData.getImage(), 0, 0, null);
+		imageData.setImage(buffy);
+	}
+
+	private static void readImageExifData(ImageData imageData, int index)
+			throws FileNotFoundException, IOException, MetadataException, ImageProcessingException
+	{
+		try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
+		{
+			imageData.setRotation(readImageInformation(stream));
+		}
+	}
+
+	private static ImageData readImageData(int index) throws FileNotFoundException, IOException
+	{
+		ImageData imageData = null;
+		try (FileInputStream stream = new FileInputStream(ImagePanel.file_list.get(index)))
+		{
+			imageData = new ImageData(ImageIO.read(stream));
+			IMAGES_MAP.put(ImagePanel.file_list.get(index), imageData);
+			fileAddHistoryList.add(index);
+
+		}
 		return imageData;
 	}
 

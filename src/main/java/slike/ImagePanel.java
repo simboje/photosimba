@@ -480,6 +480,7 @@ public class ImagePanel extends JPanel
 
 	public void loadFiles(File[] localFiles)
 	{
+		currentFile = 0;
 		if (localFiles.length > 0)
 		{
 			file_list = new ArrayList<>(Arrays.asList(localFiles));
