@@ -33,14 +33,14 @@ public class ImagePanel extends JPanel
 {
 
 	File selectedDir;
-	ArrayList<File> file_list;
+	static ArrayList<File> file_list;
 
 	BufferedImage displayImage;
 
 	private boolean init = true;
 	private AffineTransform coordTransform = new AffineTransform();
 
-	public int currentFile = 0;
+	public static int currentFile = 0;
 
 	private Point dragStartScreen;
 	private Point dragEndScreen;
@@ -50,7 +50,6 @@ public class ImagePanel extends JPanel
 	private int maxZoomLevel = 20;
 	private double zoomMultiplicationFactor = 1.2;
 
-	ImageLoaderThread imageLoaderThread;
 	private int rotateCounter = 0;
 
 	JLabel fileIndexLabel;
@@ -106,15 +105,10 @@ public class ImagePanel extends JPanel
 				Arrays.sort(notSortedFiles, new WindowsExplorerStringComparator());
 				file_list = new ArrayList<>(Arrays.asList(notSortedFiles));
 				currentFile = findFileIndex(file_list, selectedFile);
-				imageLoaderThread = new ImageLoaderThread(this);
-				// start loading images
-				imageLoaderThread.start();
 
 				if (file_list != null)
 				{
-					displayImageAndMeasureTime();
-					fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-					fileNameLabel.setText(file_list.get(currentFile).getName());
+					changeImage();
 				}
 			} else
 			{
@@ -130,9 +124,8 @@ public class ImagePanel extends JPanel
 			@Override
 			public void componentResized(ComponentEvent e)
 			{
-				init = true;
+				init = true; // fit to new frame size
 				repaint();
-//				custompaint();
 			}
 		});
 
@@ -178,25 +171,35 @@ public class ImagePanel extends JPanel
 		{
 
 			@Override
+			public void keyReleased(KeyEvent e)
+			{ // when released load new file
+				if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
+				{ // go left
+					changeImage();
+				} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
+				{ // go right
+					changeImage();
+				}
+			}
+
+			@Override
 			public void keyPressed(KeyEvent e)
 			{
 				if (file_list != null)
-				{
+				{ // XCODE when pressed just change index
 					if (e.getKeyCode() == 65 || e.getKeyCode() == 37)
 					{ // go left
 						if (currentFile > 0)
 						{
 							currentFile--;
-							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-							fileNameLabel.setText(file_list.get(currentFile).getName());
+							updateUI(currentFile);
 						}
 					} else if (e.getKeyCode() == 68 || e.getKeyCode() == 39)
 					{ // go right
 						if (currentFile < file_list.size() - 1)
 						{
 							currentFile++;
-							fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-							fileNameLabel.setText(file_list.get(currentFile).getName());
+							updateUI(currentFile);
 						}
 					} else if (e.getKeyCode() == 87 || e.getKeyCode() == 38)
 					{ // w or UP - rotate counter clockwise
@@ -206,7 +209,6 @@ public class ImagePanel extends JPanel
 									displayImage.getHeight() / 2);
 							rotateCounter--;
 							repaint();
-//							custompaint();
 						}
 
 					} else if (e.getKeyCode() == 83 || e.getKeyCode() == 40)
@@ -216,7 +218,6 @@ public class ImagePanel extends JPanel
 							coordTransform.quadrantRotate(1, displayImage.getWidth() / 2, displayImage.getHeight() / 2);
 							rotateCounter++;
 							repaint();
-//							custompaint();
 						}
 					} else if (e.getKeyCode() == 67 && e.isControlDown() && e.isShiftDown())
 					{
@@ -237,17 +238,26 @@ public class ImagePanel extends JPanel
 						}
 					} else if (e.getKeyCode() == 127) // delete
 					{
-						// really flaky, works but not always
-						// when it fails it displays file deletion window but the file is not deleted
-						// Desktop.getDesktop().moveToTrash(file_list.get(currentFile));
-
 						if (file_list.size() > 0)
 						{
 							Util.sendFileToRecycleBin(file_list.get(currentFile));
-							imageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
+							ImageLoaderThread.removeImage(file_list.get(currentFile)); // remove from cache
 							file_list.remove(currentFile); // remove from file list
-							displayNextImage();
-
+							if (!(currentFile < file_list.size()))
+							{
+								currentFile--;
+							}
+							if (currentFile == -1) // no more files left
+							{
+								displayImage = null;
+								repaint();
+								fileIndexLabel.setText("File 0/0");
+								fileNameLabel.setText("No more files left");
+								currentFile = 0;
+							} else
+							{
+								changeImage();
+							}
 						} else
 						{
 							Logger.logMessage("Failed to delete any file as file list is empty.");
@@ -260,8 +270,30 @@ public class ImagePanel extends JPanel
 					ErrorAndLogPanel.updateUI();
 				}
 			}
-
 		});
+	}
+
+	private void updateUI(int currentFile)
+	{
+		if (ImageLoaderThread.IMAGES_MAP.containsKey(file_list.get(currentFile)))
+		{
+			init = true;
+			displayImage = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getImage();
+			rotateCounter = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getRotation();
+		}
+		fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
+		fileNameLabel.setText(file_list.get(currentFile).getName());
+		repaint();
+	}
+
+	public void changeImage()
+	{
+		init = true;
+		updateUI(currentFile);
+		displayImage = ImageLoaderThread.loadImageFile(currentFile).getImage();
+		rotateCounter = ImageLoaderThread.IMAGES_MAP.get(file_list.get(currentFile)).getRotation();
+		ImageLoaderThread imageLoaderThread = new ImageLoaderThread();
+		imageLoaderThread.start();
 	}
 
 	private class WheelHandler extends MouseAdapter
@@ -291,41 +323,6 @@ public class ImagePanel extends JPanel
 		}
 	}
 
-	protected void displayNextImage()
-	{
-		if (file_list.size() > 0)
-		{
-			if (!(currentFile < file_list.size()))
-				currentFile--;
-			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-			fileNameLabel.setText(file_list.get(currentFile).getName());
-			displayImageAndMeasureTime();
-		} else
-		{
-			imageLoaderThread.setAlive(false);
-			displayImage = null;
-			repaint();
-//			custompaint();
-			fileIndexLabel.setText("File " + 0 + "/" + file_list.size());
-			if (file_list.size() > 0)
-				fileNameLabel.setText(file_list.get(currentFile).getName());
-			else
-			{
-				fileNameLabel.setText("No file is loaded.");
-			}
-		}
-	}
-
-	public List<File> getFile_list()
-	{
-		return file_list;
-	}
-
-	public void setRotateCounter(int rotateCounter)
-	{
-		this.rotateCounter = rotateCounter;
-	}
-
 	private int findFileIndex(ArrayList<File> flist, File selectedFile)
 	{
 		for (int i = 0; i < flist.size(); ++i)
@@ -334,14 +331,6 @@ public class ImagePanel extends JPanel
 				return i;
 		}
 		return 0;
-	}
-
-	private BufferedImage getDisplayImage(int currentFile)
-	{
-		init = true;
-		ImageData imageData = imageLoaderThread.getBufferedImage(currentFile);
-		this.rotateCounter = imageData.getRotation();
-		return imageData.getImage();
 	}
 
 	@Override
@@ -372,7 +361,6 @@ public class ImagePanel extends JPanel
 			}
 
 			g2.drawImage(displayImage, 0, 0, this);
-
 			g2.dispose();
 		}
 	}
@@ -441,7 +429,6 @@ public class ImagePanel extends JPanel
 			dragStartScreen = dragEndScreen;
 			dragEndScreen = null;
 			repaint();
-//			custompaint();
 		} catch (NoninvertibleTransformException ex)
 		{
 			Logger.logException(ex);
@@ -464,7 +451,6 @@ public class ImagePanel extends JPanel
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
-//					custompaint();
 				}
 			} else
 			{
@@ -476,7 +462,6 @@ public class ImagePanel extends JPanel
 					Point2D p2 = transformPoint(p);
 					coordTransform.translate(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 					repaint();
-//					custompaint();
 				}
 			}
 		} catch (NoninvertibleTransformException ex)
@@ -493,54 +478,18 @@ public class ImagePanel extends JPanel
 		return p2;
 	}
 
-	public void shutdownThread()
-	{
-		if (imageLoaderThread != null)
-			imageLoaderThread.setAlive(false);
-		
-
-	}
-
 	public void loadFiles(File[] localFiles)
 	{
 		if (localFiles.length > 0)
 		{
-			this.file_list = new ArrayList<>(Arrays.asList(localFiles));
-
-			if (imageLoaderThread != null)
-			{
-				// shutdown thread for new directory
-				imageLoaderThread.setAlive(false);
-				currentFile = 0;
-			}
-
-			imageLoaderThread = new ImageLoaderThread(this);
-			// start loading images
-			imageLoaderThread.start();
-
+			file_list = new ArrayList<>(Arrays.asList(localFiles));
 			if (file_list != null)
 			{
-				displayImageAndMeasureTime();
+				changeImage();
 			}
-
-			fileIndexLabel.setText("File " + (currentFile + 1) + "/" + file_list.size());
-			fileNameLabel.setText(file_list.get(currentFile).getName());
 		} else
 		{
 			fileIndexLabel.setText("Selected directory has no image files!");
 		}
-	}
-
-	// called from background thread
-	public void notifyAboutNewImage()
-	{
-		displayImageAndMeasureTime();
-	}
-
-	private void displayImageAndMeasureTime()
-	{
-		displayImage = getDisplayImage(currentFile); // show first image
-		repaint();
-//		custompaint();
 	}
 }
