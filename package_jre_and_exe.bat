@@ -36,6 +36,7 @@ CALL mvn test >nul 2>&1 && (
 )
 
 REM Clean build directory
+if exist build (
 CALL rmdir /Q /S build >nul 2>&1 && (
     echo Clean build/ dir:[32m OK [0m
 ) || (
@@ -43,8 +44,9 @@ CALL rmdir /Q /S build >nul 2>&1 && (
     rmdir /Q /S build
     goto :error
 )
+)
 
-REM Built-in JRE from version 1.2 is created using OpenJDK17 and is custom tailored for this application, other versions can work but are not tested.
+REM Built-in JRE starting from version 1.2 is created using OpenJDK17 and is custom tailored for this application, other versions can work but are not tested.
 REM In order to have working jlink please install OpenJDK17 (or some other version that has it) and setup environment variables
 
 REM Check if we can find jlink
@@ -56,7 +58,7 @@ CALL jlink -h >nul 2>&1 && (
     goto :error
 )
 
-REM List of dependencies is acquired using "jdeps --list-deps slike-1.2.jar"
+REM List of dependencies is acquired using "jdeps --list-deps slike-1.X.jar"
 REM Please read https://medium.com/azulsystems/using-jlink-to-build-java-runtimes-for-non-modular-applications-9568c5e70ef4
 REM Invoking jlink to create custom jre for this program
 

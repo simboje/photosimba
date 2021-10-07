@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>target\slike-1.2.jar</jar>
+  <jar>target\slike-1.3.jar</jar>
   <outfile>build\slike.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>

@@ -2,7 +2,7 @@
 ## Short description
 A simple image viewer intended to be as simple and fast as possible.
 Intention is to create something to be used instead of default Photos application on Windows 10 as the [problem with arrow keys](https://answers.microsoft.com/en-us/windows/forum/all/windows-10-photos-app-why-cant-i-use-my-arrow-keys/790e786d-b701-48ef-93c5-23d204b4fba4) could not be solved.<br>
-It is made for Windows users and .exe file is packed for convenience, but .jar is also packed so it can be used on any system that has Java installed. Please note that included JRE is Windows only, on other system jar will run but will use system JRE (must be minimum 1.8). Tested successfully on Ubuntu 18 with OpenJDK11 installed.
+It is made for Windows users and .exe file is packed for convenience, but .jar is also packed so it can be used on any system that has Java installed. Please note that included JRE is Windows only, on other systems jar will run but will use system JRE (must be minimum 1.8). Tested successfully on Ubuntu 18 with OpenJDK11 installed.
 ## Feature list
 * Portable, no installation required
 * View, zoom, rotate, delete images
@@ -13,6 +13,7 @@ It is made for Windows users and .exe file is packed for convenience, but .jar i
 Versions with bundled JRE (better)<br/>
 [Latest development build](https://1drv.ms/u/s!AhATAQSs_IENgplfeanE34012tkb9w?e=7sUxvn)<br>
 
+[Version 1.3](https://1drv.ms/u/s!AhATAQSs_IENgpoEqI8ynZA5LF9vmQ?e=L3yVRA)
 [Version 1.2](https://1drv.ms/u/s!AhATAQSs_IENgpleIHFsemLA3WTRBQ?e=Vm0zy3)
 
 Old versions using system JRE (here for reference, but have much higher memory usage)<br/>
@@ -27,9 +28,12 @@ For this you will need [launch4j](http://launch4j.sourceforge.net/docs.html). Ve
 Basic steps:
 1. Have a working OpenJDK17 on your system (other versions will work but this one is tested)
 2. Download launchj4 and unpack it so that you have the following structure 'slike/launch4j/launch4j.exe'
+3. Maven installed and added to path
 3. Run 'package_jre_and_exe.bat' from cmd, it will:<br>
-  3.1 Delete build/* dir if it exists (clean)<br>
-  3.2 Check jlink location and invoke jlink and create build/jre-17 (custom jre that contains only modules required for this program)<br>
+  3.1 Check maven version and build jar 'mvn clean compile assembly:single'<br>
+  3.2 Run junit tests with maven
+  3.3 Delete build/* dir if it exists (clean)<br>
+  3.2 Check jlink and invoke jlink and create build/jre-17 (custom jre that contains only modules required for this program)<br>
   3.3 Invoke launch4j with config file launch4j_config_jre-17.xml to create appropriate executable build/slike.exe.
 
 Note: entire build/ directory should be packed as zip for a release and it should contain build/slike.exe and build/jre-17 directory.
