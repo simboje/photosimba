@@ -11,7 +11,7 @@ import javax.swing.JFileChooser;
 public class OpenButton extends JButton
 {
 
-	private File lastVisitedLocation;
+	public static File lastVisitedLocation;
 
 	public OpenButton(String string, ImagePanel imagePanel)
 	{

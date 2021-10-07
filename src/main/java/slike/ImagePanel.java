@@ -114,7 +114,7 @@ public class ImagePanel extends JPanel
 			{
 				Logger.logMessage(selectedDir.getAbsolutePath() + " does not exist!");
 			}
-
+			OpenButton.lastVisitedLocation = selectedDir;
 		}
 
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
